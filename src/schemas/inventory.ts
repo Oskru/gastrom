@@ -30,6 +30,8 @@ export const inventoryItemSchema = z.object({
   quantity: z.number(),
   weightInGrams: z.number(),
   countable: z.boolean(),
+  minimalValue: z.number(),
+  lowStock: z.boolean(),
 });
 
 export type InventoryItem = z.infer<typeof inventoryItemSchema>;

@@ -40,6 +40,7 @@ interface InventoryFormState {
   quantity: number;
   weightInGrams: number;
   countable: boolean;
+  minimalValue: number;
 }
 
 const defaultInventoryFormState: InventoryFormState = {
@@ -50,6 +51,7 @@ const defaultInventoryFormState: InventoryFormState = {
   quantity: 0,
   weightInGrams: 0,
   countable: true,
+  minimalValue: 0,
 };
 
 /**
@@ -147,6 +149,7 @@ const InventoryPage: React.FC = () => {
       quantity: item.quantity,
       weightInGrams: item.weightInGrams,
       countable: item.countable,
+      minimalValue: item.minimalValue,
     });
     setOpenInventoryDialog(true);
   };
@@ -182,7 +185,7 @@ const InventoryPage: React.FC = () => {
     try {
       // Find the category object by its id
       const categoryObj = categories.find(
-        cat => cat.id === inventoryFormState.categoryId
+        cat => cat.id === Number(inventoryFormState.categoryId)
       );
       if (!categoryObj) {
         setError('Please select a valid category.');
@@ -191,11 +194,12 @@ const InventoryPage: React.FC = () => {
       const payload = {
         name: inventoryFormState.name,
         description: inventoryFormState.description,
-        category: categoryObj,
+        categoryId: inventoryFormState.categoryId,
         price: inventoryFormState.price,
         quantity: inventoryFormState.quantity,
         weightInGrams: inventoryFormState.weightInGrams,
         countable: inventoryFormState.countable,
+        minimalValue: inventoryFormState.minimalValue,
       };
 
       if (isEditInventory && inventoryFormState.id !== undefined) {
@@ -259,20 +263,17 @@ const InventoryPage: React.FC = () => {
 
   const handleCategorySubmit = async () => {
     try {
-      const payload = {
-        name: categoryFormState.name,
-        // Depending on your API, you may include products or leave it empty.
-        products: [],
-      };
+      const payload = categoryFormState.name;
 
       if (isEditCategory && categoryFormState.id !== undefined) {
-        await apiInstance.put(`/categories/${categoryFormState.id}`, {
-          id: categoryFormState.id,
-          ...payload,
+        await apiInstance.put(`/categories/${categoryFormState.id}`, payload, {
+          headers: { 'Content-Type': 'text/plain' },
         });
         setSnackbarMsg('Category updated successfully');
       } else {
-        await apiInstance.post('/categories', payload);
+        await apiInstance.post('/categories', payload, {
+          headers: { 'Content-Type': 'text/plain' },
+        });
         setSnackbarMsg('Category created successfully');
       }
       handleCloseCategoryDialog();
@@ -296,7 +297,7 @@ const InventoryPage: React.FC = () => {
 
   return (
     <MainContainer title='Inventory Management'>
-      <Box sx={{ px: { xs: 2, md: 4 }, py: 2, maxWidth: 1200, mx: 'auto' }}>
+      <Box sx={{ px: { xs: 2, md: 4 }, py: 2, maxWidth: 2000, mx: 'auto' }}>
         {/* Tabs for switching between Inventory Items and Categories */}
         <Tabs
           value={tabIndex}
@@ -351,6 +352,7 @@ const InventoryPage: React.FC = () => {
                         <TableCell>Price</TableCell>
                         <TableCell>Quantity</TableCell>
                         <TableCell>Weight (g)</TableCell>
+                        <TableCell>Minimal value</TableCell>
                         <TableCell>Countable</TableCell>
                         <TableCell>Actions</TableCell>
                       </TableRow>
@@ -364,6 +366,7 @@ const InventoryPage: React.FC = () => {
                           <TableCell>{item.category.name}</TableCell>
                           <TableCell>{item.price}</TableCell>
                           <TableCell>{item.quantity}</TableCell>
+                          <TableCell>{item.minimalValue}</TableCell>
                           <TableCell>{item.weightInGrams}</TableCell>
                           <TableCell>
                             <Checkbox checked={item.countable} disabled />
@@ -540,22 +543,34 @@ const InventoryPage: React.FC = () => {
               />
               <TextField
                 fullWidth
-                label='Quantity'
-                name='quantity'
-                type='number'
-                value={inventoryFormState.quantity}
+                label='Minimal value'
+                name='minimalValue'
+                value={inventoryFormState.minimalValue}
                 onChange={handleInventoryFormChange}
                 margin='normal'
               />
-              <TextField
-                fullWidth
-                label='Weight (g)'
-                name='weightInGrams'
-                type='number'
-                value={inventoryFormState.weightInGrams}
-                onChange={handleInventoryFormChange}
-                margin='normal'
-              />
+              {inventoryFormState.countable ? (
+                <TextField
+                  fullWidth
+                  label='Quantity'
+                  name='quantity'
+                  type='number'
+                  value={inventoryFormState.quantity}
+                  onChange={handleInventoryFormChange}
+                  margin='normal'
+                />
+              ) : (
+                <TextField
+                  fullWidth
+                  label='Weight (g)'
+                  name='weightInGrams'
+                  type='number'
+                  value={inventoryFormState.weightInGrams}
+                  onChange={handleInventoryFormChange}
+                  margin='normal'
+                />
+              )}
+
               <Box display='flex' alignItems='center' mt={1}>
                 <Checkbox
                   name='countable'

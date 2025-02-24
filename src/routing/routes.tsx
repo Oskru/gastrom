@@ -4,6 +4,9 @@ import Home from '../pages/home.tsx';
 import SignIn from '../pages/sign-in.tsx';
 import Inventory from '../pages/inventory.tsx';
 import EmployeesPage from '../pages/employee.tsx';
+import About from '../pages/about.tsx';
+import MyAccount from '../pages/my-account.tsx';
+import SalesReport from '../pages/sales-report.tsx';
 
 // Public routes accessible to all users
 const routesForPublic = [
@@ -42,6 +45,18 @@ const routesForAuthenticatedOnly = [
       {
         path: '/employees',
         element: <EmployeesPage />,
+      },
+      {
+        path: '/sales-reports',
+        element: <SalesReport />,
+      },
+      {
+        path: '/about',
+        element: <About />,
+      },
+      {
+        path: '/account',
+        element: <MyAccount />,
       },
     ],
   },

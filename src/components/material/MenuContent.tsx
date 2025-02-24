@@ -27,7 +27,7 @@ const mainListItems = [
   {
     text: 'Sales reports',
     icon: <AnalyticsRoundedIcon />,
-    url: '/availabilities',
+    url: '/sales-reports',
   },
 ];
 
