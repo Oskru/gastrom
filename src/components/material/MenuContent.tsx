@@ -6,7 +6,6 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import AnalyticsRoundedIcon from '@mui/icons-material/AnalyticsRounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +31,6 @@ const mainListItems = [
 ];
 
 const secondaryListItems = [
-  { text: 'Settings', icon: <SettingsRoundedIcon />, url: 'settings' },
   { text: 'About', icon: <InfoRoundedIcon />, url: '/about' },
   { text: 'Feedback', icon: <HelpRoundedIcon />, url: '/feedback' },
 ];

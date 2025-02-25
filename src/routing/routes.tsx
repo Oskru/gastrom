@@ -7,6 +7,7 @@ import EmployeesPage from '../pages/employee.tsx';
 import About from '../pages/about.tsx';
 import MyAccount from '../pages/my-account.tsx';
 import SalesReport from '../pages/sales-report.tsx';
+import Feedback from '../pages/feedback.tsx';
 
 // Public routes accessible to all users
 const routesForPublic = [
@@ -57,6 +58,10 @@ const routesForAuthenticatedOnly = [
       {
         path: '/account',
         element: <MyAccount />,
+      },
+      {
+        path: '/feedback',
+        element: <Feedback />,
       },
     ],
   },

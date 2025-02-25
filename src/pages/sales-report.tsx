@@ -156,7 +156,7 @@ const SalesReportPage: React.FC = () => {
                   outerRadius={isSmallScreen ? 80 : 100}
                   label
                 >
-                  {paymentMethodData.map((entry, index) => (
+                  {paymentMethodData.map((_entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}

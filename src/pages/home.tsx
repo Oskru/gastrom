@@ -11,8 +11,6 @@ import {
   Paper,
   Snackbar,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import MainContainer from '../components/main-container';
 import { apiInstance } from '../utils/api-instance';
@@ -26,9 +24,6 @@ interface Transaction {
 }
 
 const HomePage: React.FC = () => {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-
   // States for inventory and transactions data
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loadingInventory, setLoadingInventory] = useState<boolean>(false);

@@ -85,7 +85,7 @@ const AboutPage: React.FC = () => {
             </Typography>
             <Typography variant='body1'>
               If you have any questions or need support, please contact our team
-              at <a href='mailto:support@example.com'>support@example.com</a>.
+              at <a href='mailto:support@gastrom.com'>support@gastrom.com</a>.
             </Typography>
           </Grid>
         </Grid>

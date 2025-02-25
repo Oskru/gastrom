@@ -6,6 +6,7 @@ import IconButton, { IconButtonOwnProps } from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useColorScheme } from '@mui/material/styles';
+import type {} from '@mui/material/themeCssVarsAugmentation';
 
 export default function ColorModeIconDropdown(props: IconButtonOwnProps) {
   const { mode, systemMode, setMode } = useColorScheme();
@@ -24,8 +25,8 @@ export default function ColorModeIconDropdown(props: IconButtonOwnProps) {
   if (!mode) {
     return (
       <Box
-        data-screenshot="toggle-mode"
-        sx={(theme) => ({
+        data-screenshot='toggle-mode'
+        sx={theme => ({
           verticalAlign: 'bottom',
           display: 'inline-flex',
           width: '2.25rem',
@@ -45,12 +46,12 @@ export default function ColorModeIconDropdown(props: IconButtonOwnProps) {
   return (
     <React.Fragment>
       <IconButton
-        data-screenshot="toggle-mode"
+        data-screenshot='toggle-mode'
         onClick={handleClick}
         disableRipple
-        size="small"
+        size='small'
         aria-controls={open ? 'color-scheme-menu' : undefined}
-        aria-haspopup="true"
+        aria-haspopup='true'
         aria-expanded={open ? 'true' : undefined}
         {...props}
       >
@@ -58,7 +59,7 @@ export default function ColorModeIconDropdown(props: IconButtonOwnProps) {
       </IconButton>
       <Menu
         anchorEl={anchorEl}
-        id="account-menu"
+        id='account-menu'
         open={open}
         onClose={handleClose}
         onClick={handleClose}

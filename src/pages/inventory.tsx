@@ -8,7 +8,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   Paper,
   Snackbar,
   Tab,
@@ -128,6 +127,7 @@ const InventoryPage: React.FC = () => {
 
   /** TAB CHANGE **/
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    event.preventDefault();
     setTabIndex(newValue);
   };
 
@@ -321,7 +321,7 @@ const InventoryPage: React.FC = () => {
             >
               <Box
                 component='h1'
-                sx={{ m: 0, fontSize: { xs: '1.5rem', sm: '2rem' } }}
+                sx={{ m: 0, mr: 20, fontSize: { xs: '1.5rem', sm: '2rem' } }}
               >
                 Inventory Items
               </Box>
@@ -421,7 +421,7 @@ const InventoryPage: React.FC = () => {
             >
               <Box
                 component='h1'
-                sx={{ m: 0, fontSize: { xs: '1.5rem', sm: '2rem' } }}
+                sx={{ m: 0, mr: 20, fontSize: { xs: '1.5rem', sm: '2rem' } }}
               >
                 Product Categories
               </Box>

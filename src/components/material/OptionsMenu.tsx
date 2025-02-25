@@ -60,8 +60,6 @@ export default function OptionsMenu() {
       >
         <MenuItem onClick={() => navigate('/account')}>My account</MenuItem>
         <Divider />
-        <MenuItem onClick={handleClose}>Settings</MenuItem>
-        <Divider />
         <MenuItem
           onClick={() => {
             handleClose();
