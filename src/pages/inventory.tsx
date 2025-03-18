@@ -1,5 +1,5 @@
 // src/pages/InventoryPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -22,10 +22,27 @@ import {
   Checkbox,
   useMediaQuery,
   useTheme,
+  FormControlLabel,
+  Switch,
+  Tooltip,
+  IconButton,
+  Typography,
+  Chip,
 } from '@mui/material';
 import MainContainer from '../components/main-container';
 import { apiInstance } from '../utils/api-instance';
 import { InventoryItem, ProductCategory } from '../schemas/inventory';
+import {
+  useInventory,
+  useCreateInventoryItem,
+  useUpdateInventoryItem,
+  useDeleteInventoryItem,
+  useLowStockItems,
+} from '../hooks/use-inventory';
+import WarningIcon from '@mui/icons-material/Warning';
+import { alpha } from '@mui/material/styles';
+import LowStockIndicator from '../components/material/LowStockIndicator';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 /**
  * INVENTORY ITEM FORM TYPES
@@ -68,10 +85,9 @@ const defaultCategoryFormState: CategoryFormState = {
 const InventoryPage: React.FC = () => {
   // Tab management: 0 = Inventory Items, 1 = Product Categories
   const [tabIndex, setTabIndex] = useState<number>(0);
+  const [showLowStockOnly, setShowLowStockOnly] = useState<boolean>(false);
 
   /** INVENTORY ITEMS STATE **/
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [loadingInventory, setLoadingInventory] = useState<boolean>(false);
   const [openInventoryDialog, setOpenInventoryDialog] =
     useState<boolean>(false);
   const [inventoryFormState, setInventoryFormState] =
@@ -79,8 +95,6 @@ const InventoryPage: React.FC = () => {
   const [isEditInventory, setIsEditInventory] = useState<boolean>(false);
 
   /** PRODUCT CATEGORIES STATE **/
-  // This state is used both for the category select in the inventory item form
-  // and for the Categories management tab.
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [openCategoryDialog, setOpenCategoryDialog] = useState<boolean>(false);
   const [categoryFormState, setCategoryFormState] = useState<CategoryFormState>(
@@ -96,39 +110,47 @@ const InventoryPage: React.FC = () => {
   const theme = useTheme();
   const fullScreenDialog = useMediaQuery(theme.breakpoints.down('sm'));
 
-  /** FETCH FUNCTIONS **/
-  const fetchInventory = async () => {
-    setLoadingInventory(true);
-    try {
-      const response = await apiInstance.get<InventoryItem[]>('/inventory');
-      setInventory(response.data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch inventory');
-    } finally {
-      setLoadingInventory(false);
-    }
-  };
+  /** REACT QUERY HOOKS **/
+  const { data: inventoryItems = [], isLoading: isLoadingInventory } =
+    useInventory();
 
-  const fetchCategories = async () => {
+  const { data: lowStockItems = [], isLoading: isLoadingLowStock } =
+    useLowStockItems();
+
+  const createInventoryItem = useCreateInventoryItem();
+  const updateInventoryItem = useUpdateInventoryItem();
+  const deleteInventoryItem = useDeleteInventoryItem();
+
+  // Display items based on filter setting
+  const displayItems = showLowStockOnly ? lowStockItems : inventoryItems;
+
+  // Fetch categories from API (temporary until we add React Query for categories)
+  const fetchCategories = async (): Promise<void> => {
     try {
       const response = await apiInstance.get<ProductCategory[]>('/categories');
-      // (Optional) If your backend returns a recursive structure, normalize here.
-      // For now we assume each category has at least { id, name }.
       setCategories(response.data);
-    } catch (err: any) {
-      console.error('Failed to fetch categories', err);
+    } catch (err) {
+      const error = err as Error;
+      console.error('Failed to fetch categories', error);
     }
   };
 
-  useEffect(() => {
-    fetchInventory();
+  React.useEffect(() => {
     fetchCategories();
   }, []);
 
   /** TAB CHANGE **/
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (
+    event: React.SyntheticEvent,
+    newValue: number
+  ): void => {
     event.preventDefault();
     setTabIndex(newValue);
+  };
+
+  /** LOW STOCK FILTER **/
+  const handleLowStockFilterChange = (): void => {
+    setShowLowStockOnly(!showLowStockOnly);
   };
 
   /**************** Inventory Items CRUD ****************/
@@ -165,7 +187,11 @@ const InventoryPage: React.FC = () => {
     setInventoryFormState(prev => ({
       ...prev,
       [name]:
-        name === 'price' || name === 'quantity' || name === 'weightInGrams'
+        name === 'categoryId' ||
+        name === 'price' ||
+        name === 'quantity' ||
+        name === 'weightInGrams' ||
+        name === 'minimalValue'
           ? Number(value)
           : value,
     }));
@@ -181,7 +207,7 @@ const InventoryPage: React.FC = () => {
     }));
   };
 
-  const handleInventorySubmit = async () => {
+  const handleInventorySubmit = async (): Promise<void> => {
     try {
       // Find the category object by its id
       const categoryObj = categories.find(
@@ -202,32 +228,41 @@ const InventoryPage: React.FC = () => {
         minimalValue: inventoryFormState.minimalValue,
       };
 
+      // Calculate lowStock based on whether item is countable
+      const isLowStock = payload.countable
+        ? payload.quantity < payload.minimalValue
+        : payload.weightInGrams < payload.minimalValue;
+
       if (isEditInventory && inventoryFormState.id !== undefined) {
-        await apiInstance.put(`/inventory/${inventoryFormState.id}`, {
+        await updateInventoryItem.mutateAsync({
           id: inventoryFormState.id,
           ...payload,
-        });
+          category: categoryObj,
+          lowStock: isLowStock,
+        } as InventoryItem);
         setSnackbarMsg('Inventory item updated successfully');
       } else {
-        await apiInstance.post('/inventory', payload);
+        await createInventoryItem.mutateAsync(
+          payload as unknown as Omit<InventoryItem, 'id'>
+        );
         setSnackbarMsg('Inventory item created successfully');
       }
       handleCloseInventoryDialog();
-      fetchInventory();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save inventory item');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to save inventory item');
     }
   };
 
-  const handleInventoryDelete = async (id: number) => {
+  const handleInventoryDelete = async (id: number): Promise<void> => {
     if (!window.confirm('Are you sure you want to delete this inventory item?'))
       return;
     try {
-      await apiInstance.delete(`/inventory/${id}`);
+      await deleteInventoryItem.mutateAsync(id);
       setSnackbarMsg('Inventory item deleted successfully');
-      fetchInventory();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete inventory item');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to delete inventory item');
     }
   };
 
@@ -261,13 +296,16 @@ const InventoryPage: React.FC = () => {
     }));
   };
 
-  const handleCategorySubmit = async () => {
+  const handleCategorySubmit = async (): Promise<void> => {
     try {
-      const payload = categoryFormState.name;
+      const payload = {
+        name: categoryFormState.name,
+      };
 
       if (isEditCategory && categoryFormState.id !== undefined) {
-        await apiInstance.put(`/categories/${categoryFormState.id}`, payload, {
-          headers: { 'Content-Type': 'text/plain' },
+        await apiInstance.put(`/categories/${categoryFormState.id}`, {
+          id: categoryFormState.id,
+          ...payload,
         });
         setSnackbarMsg('Category updated successfully');
       } else {
@@ -278,20 +316,22 @@ const InventoryPage: React.FC = () => {
       }
       handleCloseCategoryDialog();
       fetchCategories();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save category');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to save category');
     }
   };
 
-  const handleCategoryDelete = async (id: number) => {
+  const handleCategoryDelete = async (id: number): Promise<void> => {
     if (!window.confirm('Are you sure you want to delete this category?'))
       return;
     try {
       await apiInstance.delete(`/categories/${id}`);
       setSnackbarMsg('Category deleted successfully');
       fetchCategories();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete category');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to delete category');
     }
   };
 
@@ -325,24 +365,175 @@ const InventoryPage: React.FC = () => {
               >
                 Inventory Items
               </Box>
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={handleOpenInventoryDialogForCreate}
-                sx={{ mt: { xs: 2, sm: 0 } }}
-              >
-                Add Inventory Item
-              </Button>
+              <Box display='flex' alignItems='center' gap={2}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showLowStockOnly}
+                      onChange={handleLowStockFilterChange}
+                      color='warning'
+                    />
+                  }
+                  label={
+                    <Box display='flex' alignItems='center' gap={0.5}>
+                      <WarningIcon fontSize='small' color='warning' />
+                      <span>Low Stock Only</span>
+                    </Box>
+                  }
+                />
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={handleOpenInventoryDialogForCreate}
+                >
+                  Add Inventory Item
+                </Button>
+              </Box>
             </Box>
 
-            {loadingInventory ? (
+            {/* Low Stock Summary */}
+            {lowStockItems.length > 0 && (
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 3,
+                  border: '1px solid',
+                  borderColor: theme => theme.palette.warning.light,
+                  bgcolor: theme => alpha(theme.palette.warning.light, 0.1),
+                  borderRadius: 2,
+                }}
+              >
+                <Box display='flex' alignItems='center' flexWrap='wrap' gap={2}>
+                  <Box display='flex' alignItems='center' gap={1}>
+                    <WarningIcon color='warning' />
+                    <Typography variant='h6' color='warning.dark'>
+                      Low Stock Alert: {lowStockItems.length}{' '}
+                      {lowStockItems.length === 1 ? 'item' : 'items'} below
+                      minimum levels
+                    </Typography>
+                  </Box>
+
+                  <Button
+                    variant='outlined'
+                    color='warning'
+                    size='small'
+                    onClick={handleLowStockFilterChange}
+                    startIcon={<WarningIcon />}
+                    sx={{ ml: 'auto' }}
+                  >
+                    {showLowStockOnly
+                      ? 'Show All Items'
+                      : 'Show Low Stock Only'}
+                  </Button>
+                </Box>
+
+                <Box mt={2} display='flex' flexWrap='wrap' gap={1}>
+                  {lowStockItems.slice(0, 5).map(item => {
+                    // Calculate values for stock level display
+                    const currentValue = item.countable
+                      ? item.quantity
+                      : item.weightInGrams;
+                    const percentage = Math.min(
+                      100,
+                      Math.round((currentValue / item.minimalValue) * 100)
+                    );
+                    const chipColor: 'error' | 'warning' =
+                      percentage < 50 ? 'error' : 'warning';
+
+                    return (
+                      <Chip
+                        key={item.id}
+                        label={
+                          <Box
+                            component='span'
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                            }}
+                          >
+                            <Typography
+                              variant='caption'
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {item.name}:
+                            </Typography>
+                            <Typography
+                              variant='caption'
+                              sx={{
+                                backgroundColor: theme =>
+                                  alpha(theme.palette[chipColor].main, 0.1),
+                                padding: '2px 4px',
+                                borderRadius: '4px',
+                                fontWeight: 500,
+                              }}
+                            >
+                              {Math.round(percentage)}%
+                            </Typography>
+                            <Typography variant='caption'>
+                              {currentValue}/{item.minimalValue}
+                              {!item.countable && 'g'}
+                            </Typography>
+                          </Box>
+                        }
+                        icon={<WarningIcon fontSize='small' />}
+                        size='medium'
+                        color={chipColor}
+                        variant='outlined'
+                        onClick={() => handleOpenInventoryDialogForEdit(item)}
+                        sx={{
+                          borderRadius: '6px',
+                          height: 'auto',
+                          py: 0.5,
+                          '& .MuiChip-label': {
+                            display: 'block',
+                            px: 1,
+                          },
+                        }}
+                      />
+                    );
+                  })}
+                  {lowStockItems.length > 5 && (
+                    <Chip
+                      label={`+${lowStockItems.length - 5} more`}
+                      size='medium'
+                      variant='outlined'
+                      color='warning'
+                      onClick={handleLowStockFilterChange}
+                      sx={{ borderRadius: '6px' }}
+                    />
+                  )}
+                </Box>
+              </Paper>
+            )}
+
+            {isLoadingInventory || isLoadingLowStock ? (
               <Box display='flex' justifyContent='center' m={2}>
                 <CircularProgress />
               </Box>
             ) : (
               <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                <TableContainer component={Paper}>
-                  <Table aria-label='inventory items table'>
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    boxShadow: theme => theme.shadows[2],
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Table
+                    aria-label='inventory items table'
+                    sx={{
+                      '& .MuiTableRow-root': {
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                      },
+                      '& .MuiTableCell-root': {
+                        borderBottom: 'none',
+                      },
+                    }}
+                  >
                     <TableHead>
                       <TableRow>
                         <TableCell>ID</TableCell>
@@ -350,54 +541,121 @@ const InventoryPage: React.FC = () => {
                         <TableCell>Description</TableCell>
                         <TableCell>Category</TableCell>
                         <TableCell>Price</TableCell>
-                        <TableCell>Quantity</TableCell>
-                        <TableCell>Weight (g)</TableCell>
-                        <TableCell>Minimal value</TableCell>
-                        <TableCell>Countable</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell width='380px'>
+                          Stock Level
+                          {showLowStockOnly && (
+                            <Tooltip title='Items with stock level below minimal value'>
+                              <IconButton size='small' sx={{ ml: 0.5 }}>
+                                <WarningIcon fontSize='small' color='warning' />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                        <TableCell width='120px'>
+                          <Tooltip title='Minimum stock level that should be maintained. Based on units for countable items or grams for non-countable items.'>
+                            <Box
+                              component='span'
+                              sx={{ display: 'flex', alignItems: 'center' }}
+                            >
+                              Min Threshold
+                              <HelpOutlineIcon
+                                fontSize='small'
+                                sx={{ ml: 0.5, color: 'text.secondary' }}
+                              />
+                            </Box>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell width='100px'>Countable</TableCell>
+                        <TableCell width='180px'>Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {inventory.map(item => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.id}</TableCell>
-                          <TableCell>{item.name}</TableCell>
-                          <TableCell>{item.description}</TableCell>
-                          <TableCell>{item.category.name}</TableCell>
-                          <TableCell>{item.price}</TableCell>
-                          <TableCell>{item.quantity}</TableCell>
-                          <TableCell>{item.minimalValue}</TableCell>
-                          <TableCell>{item.weightInGrams}</TableCell>
-                          <TableCell>
-                            <Checkbox checked={item.countable} disabled />
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant='outlined'
-                              color='primary'
-                              size='small'
-                              onClick={() =>
-                                handleOpenInventoryDialogForEdit(item)
-                              }
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant='outlined'
-                              color='secondary'
-                              size='small'
-                              onClick={() => handleInventoryDelete(item.id)}
-                              sx={{ ml: 1 }}
-                            >
-                              Delete
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {inventory.length === 0 && (
+                      {displayItems.map(item => {
+                        // Determine if the item is low on stock based on whether it's countable
+                        const isLowStock = item.countable
+                          ? item.quantity < item.minimalValue
+                          : item.weightInGrams < item.minimalValue;
+
+                        return (
+                          <TableRow
+                            key={item.id}
+                            sx={{
+                              backgroundColor: isLowStock
+                                ? alpha(theme.palette.warning.light, 0.1)
+                                : 'inherit',
+                              '&:hover': {
+                                backgroundColor: isLowStock
+                                  ? alpha(theme.palette.warning.light, 0.2)
+                                  : alpha(theme.palette.action.hover, 0.1),
+                              },
+                            }}
+                          >
+                            <TableCell>{item.id}</TableCell>
+                            <TableCell>{item.name}</TableCell>
+                            <TableCell>{item.description}</TableCell>
+                            <TableCell>{item.category.name}</TableCell>
+                            <TableCell>{item.price}</TableCell>
+                            <TableCell sx={{ py: 2 }}>
+                              <Box
+                                sx={{
+                                  width: '100%',
+                                  px: 1,
+                                  boxSizing: 'border-box',
+                                }}
+                              >
+                                <LowStockIndicator
+                                  quantity={
+                                    item.countable ? item.quantity : undefined
+                                  }
+                                  weightInGrams={
+                                    !item.countable
+                                      ? item.weightInGrams
+                                      : undefined
+                                  }
+                                  minimalValue={item.minimalValue}
+                                  countable={item.countable}
+                                  showDetails
+                                />
+                              </Box>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: 'center' }}>
+                              {item.minimalValue}
+                              {!item.countable && 'g'}
+                            </TableCell>
+                            <TableCell sx={{ textAlign: 'center' }}>
+                              <Checkbox checked={item.countable} disabled />
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Button
+                                  variant='outlined'
+                                  color='primary'
+                                  size='small'
+                                  onClick={() =>
+                                    handleOpenInventoryDialogForEdit(item)
+                                  }
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant='outlined'
+                                  color='secondary'
+                                  size='small'
+                                  onClick={() => handleInventoryDelete(item.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      {displayItems.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={9} align='center'>
-                            No inventory items found.
+                          <TableCell colSpan={10} align='center'>
+                            {showLowStockOnly
+                              ? 'No low stock items found.'
+                              : 'No inventory items found.'}
                           </TableCell>
                         </TableRow>
                       )}
@@ -436,8 +694,26 @@ const InventoryPage: React.FC = () => {
             </Box>
 
             <Box sx={{ width: '100%', overflowX: 'auto' }}>
-              <TableContainer component={Paper}>
-                <Table aria-label='categories table'>
+              <TableContainer
+                component={Paper}
+                sx={{
+                  boxShadow: theme => theme.shadows[2],
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                }}
+              >
+                <Table
+                  aria-label='categories table'
+                  sx={{
+                    '& .MuiTableRow-root': {
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                    },
+                    '& .MuiTableCell-root': {
+                      borderBottom: 'none',
+                    },
+                  }}
+                >
                   <TableHead>
                     <TableRow>
                       <TableCell>ID</TableCell>
@@ -541,14 +817,24 @@ const InventoryPage: React.FC = () => {
                 onChange={handleInventoryFormChange}
                 margin='normal'
               />
-              <TextField
-                fullWidth
-                label='Minimal value'
-                name='minimalValue'
-                value={inventoryFormState.minimalValue}
-                onChange={handleInventoryFormChange}
-                margin='normal'
-              />
+
+              <Box display='flex' alignItems='center' mt={2} mb={1}>
+                <Checkbox
+                  name='countable'
+                  checked={inventoryFormState.countable}
+                  onChange={handleInventoryCheckboxChange}
+                />
+                <Typography>
+                  Countable
+                  <Tooltip title='Check this if the item can be counted as individual units. Uncheck for items that are measured by weight.'>
+                    <IconButton size='small'>
+                      <HelpOutlineIcon fontSize='small' />
+                    </IconButton>
+                  </Tooltip>
+                </Typography>
+              </Box>
+
+              {/* Display appropriate fields based on countable status */}
               {inventoryFormState.countable ? (
                 <TextField
                   fullWidth
@@ -562,7 +848,7 @@ const InventoryPage: React.FC = () => {
               ) : (
                 <TextField
                   fullWidth
-                  label='Weight (g)'
+                  label='Weight (in grams)'
                   name='weightInGrams'
                   type='number'
                   value={inventoryFormState.weightInGrams}
@@ -571,14 +857,21 @@ const InventoryPage: React.FC = () => {
                 />
               )}
 
-              <Box display='flex' alignItems='center' mt={1}>
-                <Checkbox
-                  name='countable'
-                  checked={inventoryFormState.countable}
-                  onChange={handleInventoryCheckboxChange}
-                />
-                <span>Countable</span>
-              </Box>
+              {/* Minimal value field with appropriate label based on countable status */}
+              <TextField
+                fullWidth
+                label={`Minimal value${!inventoryFormState.countable ? ' (in grams)' : ''}`}
+                name='minimalValue'
+                type='number'
+                value={inventoryFormState.minimalValue}
+                onChange={handleInventoryFormChange}
+                margin='normal'
+                helperText={
+                  !inventoryFormState.countable
+                    ? 'The minimum weight in grams that should be maintained'
+                    : 'The minimum quantity that should be maintained'
+                }
+              />
             </Box>
           </DialogContent>
           <DialogActions>

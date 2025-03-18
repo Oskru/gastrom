@@ -1,83 +1,130 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
-import Divider, { dividerClasses } from '@mui/material/Divider';
+import { styled, alpha } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MuiMenuItem from '@mui/material/MenuItem';
-import { paperClasses } from '@mui/material/Paper';
-import { listClasses } from '@mui/material/List';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon, { listItemIconClasses } from '@mui/material/ListItemIcon';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import MenuButton from './MenuButton';
-import { useAuth } from '../../hooks/use-auth.ts';
-import { useNavigate } from 'react-router-dom';
 
-const MenuItem = styled(MuiMenuItem)({
-  margin: '2px 0',
-});
+const MenuItem = styled(MuiMenuItem)(({ theme }) => ({
+  margin: '2px 8px',
+  padding: '8px 12px',
+  borderRadius: theme.shape.borderRadius,
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  '&.Mui-selected': {
+    backgroundColor: theme.palette.action.selected,
+    '&:hover': {
+      backgroundColor: theme.palette.action.selected,
+    },
+  },
+}));
 
-export default function OptionsMenu() {
+interface OptionsMenuProps {
+  anchorOrigin?: {
+    vertical: 'top' | 'bottom';
+    horizontal: 'left' | 'right';
+  };
+  transformOrigin?: {
+    vertical: 'top' | 'bottom';
+    horizontal: 'left' | 'right';
+  };
+  buttonVariant?: 'icon' | 'text';
+  buttonText?: string;
+  options: { label: string; onClick: () => void }[];
+  compact?: boolean;
+}
+
+export default function OptionsMenu({
+  anchorOrigin = { vertical: 'bottom', horizontal: 'right' },
+  transformOrigin = { vertical: 'top', horizontal: 'right' },
+  buttonVariant = 'icon',
+  buttonText = 'Options',
+  options,
+  compact = false,
+}: OptionsMenuProps) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate();
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const { logout } = useAuth();
+
+  const handleOptionClick = (onClick: () => void) => {
+    onClick();
+    handleClose();
+  };
 
   return (
-    <React.Fragment>
-      <MenuButton
-        aria-label='Open menu'
-        onClick={handleClick}
-        sx={{ borderColor: 'transparent' }}
-      >
-        <MoreVertRoundedIcon />
-      </MenuButton>
-      <Menu
-        anchorEl={anchorEl}
-        id='menu'
-        open={open}
-        onClose={handleClose}
-        onClick={handleClose}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        sx={{
-          [`& .${listClasses.root}`]: {
-            padding: '4px',
-          },
-          [`& .${paperClasses.root}`]: {
-            padding: 0,
-          },
-          [`& .${dividerClasses.root}`]: {
-            margin: '4px -4px',
-          },
-        }}
-      >
-        <MenuItem onClick={() => navigate('/account')}>My account</MenuItem>
-        <Divider />
-        <MenuItem
-          onClick={() => {
-            handleClose();
-            logout();
-          }}
+    <>
+      {buttonVariant === 'icon' ? (
+        <MenuButton
+          onClick={handleClick}
+          size={compact ? 'small' : 'medium'}
           sx={{
-            [`& .${listItemIconClasses.root}`]: {
-              ml: 'auto',
-              minWidth: 0,
+            minWidth: compact ? 32 : 40,
+            height: compact ? 32 : 40,
+            padding: compact ? '4px' : '8px',
+          }}
+        >
+          <MoreVertRoundedIcon fontSize={compact ? 'small' : 'medium'} />
+        </MenuButton>
+      ) : (
+        <Button
+          variant='text'
+          onClick={handleClick}
+          sx={{
+            color: 'text.primary',
+            '&:hover': {
+              backgroundColor: theme => alpha(theme.palette.primary.main, 0.08),
             },
           }}
         >
-          <ListItemText>Logout</ListItemText>
-          <ListItemIcon>
-            <LogoutRoundedIcon fontSize='small' />
-          </ListItemIcon>
-        </MenuItem>
+          {buttonText}
+        </Button>
+      )}
+
+      <Menu
+        anchorEl={anchorEl}
+        id='account-menu'
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.12))',
+            mt: 1.5,
+            borderRadius: 2,
+            width: 200,
+            '& .MuiAvatar-root': {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+          },
+        }}
+        transformOrigin={transformOrigin}
+        anchorOrigin={anchorOrigin}
+      >
+        {options.map((option, index) => (
+          <MenuItem
+            key={index}
+            onClick={() => handleOptionClick(option.onClick)}
+            sx={{ py: 1.5 }}
+          >
+            <Typography variant='body2'>{option.label}</Typography>
+          </MenuItem>
+        ))}
       </Menu>
-    </React.Fragment>
+    </>
   );
 }

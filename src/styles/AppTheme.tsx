@@ -32,7 +32,13 @@ export default function AppTheme({
             cssVarPrefix: 'template',
           },
           colorSchemes, // Recently added in v6 for building light & dark mode app, see https://mui.com/material-ui/customization/palette/#color-schemes
-          typography,
+          typography: {
+            ...typography,
+            button: {
+              ...typography.button,
+              textTransform: 'none' as const,
+            },
+          },
           shadows,
           shape,
           components: {
