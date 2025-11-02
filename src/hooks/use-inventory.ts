@@ -125,5 +125,7 @@ export const inventoryKeys = ingredientKeys;
 // Only create, delete, and restock operations are available
 // This export is provided for backward compatibility but will throw an error if used
 export const useUpdateInventoryItem = () => {
-  throw new Error('Update operation not supported by API. Use restock or delete/recreate instead.');
+  throw new Error(
+    'Update operation not supported by API. Use restock or delete/recreate instead.'
+  );
 };

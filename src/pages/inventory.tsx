@@ -36,7 +36,11 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import MainContainer from '../components/main-container';
-import { IngredientDto, CreateIngredientCommand, Unit } from '../schemas/inventory';
+import {
+  IngredientDto,
+  CreateIngredientCommand,
+  Unit,
+} from '../schemas/inventory';
 import {
   useIngredients,
   useCreateIngredient,
@@ -63,18 +67,23 @@ interface RestockFormState {
 const InventoryPage: React.FC = () => {
   const theme = useTheme();
   const fullScreenDialog = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [showLowStockOnly, setShowLowStockOnly] = useState<boolean>(false);
-  const [openIngredientDialog, setOpenIngredientDialog] = useState<boolean>(false);
+  const [openIngredientDialog, setOpenIngredientDialog] =
+    useState<boolean>(false);
   const [openRestockDialog, setOpenRestockDialog] = useState<boolean>(false);
-  const [ingredientFormState, setIngredientFormState] = useState<CreateIngredientCommand>(defaultIngredientFormState);
-  const [restockFormState, setRestockFormState] = useState<RestockFormState | null>(null);
+  const [ingredientFormState, setIngredientFormState] =
+    useState<CreateIngredientCommand>(defaultIngredientFormState);
+  const [restockFormState, setRestockFormState] =
+    useState<RestockFormState | null>(null);
   const [snackbarMsg, setSnackbarMsg] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   // React Query hooks
-  const { data: allIngredients = [], isLoading: isLoadingAll } = useIngredients();
-  const { data: lowStockIngredients = [], isLoading: isLoadingLowStock } = useLowStockIngredients();
+  const { data: allIngredients = [], isLoading: isLoadingAll } =
+    useIngredients();
+  const { data: lowStockIngredients = [], isLoading: isLoadingLowStock } =
+    useLowStockIngredients();
   const createIngredient = useCreateIngredient();
   const restockIngredient = useRestockIngredient();
   const deleteIngredient = useDeleteIngredient();
@@ -113,14 +122,19 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleIngredientFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: string } }
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | { target: { name: string; value: string } }
   ) => {
     const { name, value } = e.target;
     setIngredientFormState(prev => ({
       ...prev,
-      [name]: name === 'stockQuantity' || name === 'alertQuantity' || name === 'unitCost'
-        ? Number(value)
-        : value,
+      [name]:
+        name === 'stockQuantity' ||
+        name === 'alertQuantity' ||
+        name === 'unitCost'
+          ? Number(value)
+          : value,
     }));
   };
 
@@ -263,7 +277,9 @@ const InventoryPage: React.FC = () => {
                   >
                     <TableCell>{item.id}</TableCell>
                     <TableCell>
-                      <Typography fontWeight={isLowStock(item) ? 'bold' : 'normal'}>
+                      <Typography
+                        fontWeight={isLowStock(item) ? 'bold' : 'normal'}
+                      >
                         {item.name}
                       </Typography>
                     </TableCell>
@@ -441,8 +457,13 @@ const InventoryPage: React.FC = () => {
                   required
                   inputProps={{ min: 0 }}
                 />
-                <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
-                  New Stock: {restockFormState.currentStock + restockFormState.quantity}
+                <Typography
+                  variant='body2'
+                  color='text.secondary'
+                  sx={{ mt: 1 }}
+                >
+                  New Stock:{' '}
+                  {restockFormState.currentStock + restockFormState.quantity}
                 </Typography>
               </Box>
             )}
