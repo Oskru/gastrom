@@ -1,12 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiInstance } from '../utils/api-instance';
-
-export interface Transaction {
-  id: number;
-  totalAmount: number;
-  date: string; // Expected format "YYYY-MM-DD"
-  paymentMethod: string;
-}
+import {
+  TransactionDto,
+  CreateTransactionCommand,
+} from '../schemas/transaction';
 
 // Query keys for cache management
 export const transactionKeys = {
@@ -23,7 +20,7 @@ export const useTransactions = (options = {}) => {
   return useQuery({
     queryKey: transactionKeys.lists(),
     queryFn: async () => {
-      const response = await apiInstance.get<Transaction[]>('/transactions');
+      const response = await apiInstance.get<TransactionDto[]>('/transactions');
       return response.data;
     },
     ...options,
@@ -32,10 +29,19 @@ export const useTransactions = (options = {}) => {
 
 // Fetch today's transactions
 export const useTodayTransactions = (options = {}) => {
-  const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
   const { data: allTransactions = [], ...rest } = useTransactions(options);
 
-  const todayTransactions = allTransactions.filter(tx => tx.date === today);
+  // Filter transactions that occurred today
+  const todayTransactions = allTransactions.filter(tx => {
+    const txDate = new Date(tx.dateTime);
+    const todayDate = new Date();
+    return (
+      txDate.getFullYear() === todayDate.getFullYear() &&
+      txDate.getMonth() === todayDate.getMonth() &&
+      txDate.getDate() === todayDate.getDate()
+    );
+  });
+
   const totalSalesToday = todayTransactions.reduce(
     (sum, tx) => sum + tx.totalAmount,
     0
@@ -54,7 +60,7 @@ export const useRecentTransactions = (limit = 5, options = {}) => {
   const { data: allTransactions = [], ...rest } = useTransactions(options);
 
   const sortedTransactions = [...allTransactions].sort((a, b) =>
-    a.date < b.date ? 1 : -1
+    a.dateTime < b.dateTime ? 1 : -1
   );
   const recentTransactions = sortedTransactions.slice(0, limit);
 
@@ -69,7 +75,7 @@ export const useTransaction = (id: number, options = {}) => {
   return useQuery({
     queryKey: transactionKeys.detail(id),
     queryFn: async () => {
-      const response = await apiInstance.get<Transaction>(
+      const response = await apiInstance.get<TransactionDto>(
         `/transactions/${id}`
       );
       return response.data;
@@ -84,8 +90,8 @@ export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newTransaction: Omit<Transaction, 'id'>) => {
-      const response = await apiInstance.post<Transaction>(
+    mutationFn: async (newTransaction: CreateTransactionCommand) => {
+      const response = await apiInstance.post<TransactionDto>(
         '/transactions',
         newTransaction
       );
@@ -106,7 +112,7 @@ export const useTransactionsByDateRange = (
   const { data: allTransactions = [], ...rest } = useTransactions(options);
 
   const filteredTransactions = allTransactions.filter(
-    tx => tx.date >= startDate && tx.date <= endDate
+    tx => tx.dateTime >= startDate && tx.dateTime <= endDate
   );
 
   return {
@@ -148,7 +154,7 @@ export const useDailySalesData = (options = {}) => {
 
   const dailySalesMap: Record<string, number> = {};
   transactions.forEach(tx => {
-    const date = tx.date;
+    const date = tx.dateTime.split('T')[0]; // Extract date part from ISO datetime
     if (dailySalesMap[date]) {
       dailySalesMap[date] += tx.totalAmount;
     } else {

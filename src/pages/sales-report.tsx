@@ -148,7 +148,7 @@ const SalesReportPage: React.FC = () => {
     };
 
     transactions.forEach(tx => {
-      const date = new Date(tx.date);
+      const date = new Date(tx.dateTime);
       const weekday = weekdays[date.getDay()];
       weekdaySales[weekday] += tx.totalAmount;
     });
@@ -164,7 +164,7 @@ const SalesReportPage: React.FC = () => {
     const monthlyMap: Record<string, number> = {};
 
     transactions.forEach(tx => {
-      const month = tx.date.substring(0, 7); // YYYY-MM format
+      const month = tx.dateTime.substring(0, 7); // YYYY-MM format
       monthlyMap[month] = (monthlyMap[month] || 0) + tx.totalAmount;
     });
 
@@ -695,7 +695,9 @@ const SalesReportPage: React.FC = () => {
                               >
                                 Date:
                               </Typography>
-                              <Typography variant='body1'>{tx.date}</Typography>
+                              <Typography variant='body1'>
+                                {new Date(tx.dateTime).toLocaleDateString()}
+                              </Typography>
                             </Grid>
                             <Grid item xs={12}>
                               <Typography

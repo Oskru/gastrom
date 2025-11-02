@@ -1,37 +1,38 @@
 // src/schemas/inventory.ts
 import { z } from 'zod';
 
-// A summary of a product (inventory item) to be used inside a category
-export const productSummarySchema = z.object({
+// Unit enum for ingredients
+export const unitEnum = z.enum(['G', 'ML', 'PCS']);
+export type Unit = z.infer<typeof unitEnum>;
+
+// Ingredient DTO matching the API specification
+export const ingredientDtoSchema = z.object({
   id: z.number(),
   name: z.string(),
-  description: z.string(),
-  // you can include other fields if needed
+  unit: unitEnum,
+  stockQuantity: z.number(),
+  alertQuantity: z.number(),
+  unitCost: z.number(),
 });
 
-export type ProductSummary = z.infer<typeof productSummarySchema>;
+export type IngredientDto = z.infer<typeof ingredientDtoSchema>;
 
-// The category now has an array of product summaries
-export const productCategorySchema = z.object({
-  id: z.number(),
+// Create Ingredient Command for POST requests
+export const createIngredientCommandSchema = z.object({
   name: z.string(),
-  products: z.array(productSummarySchema),
+  unit: unitEnum,
+  stockQuantity: z.number(),
+  alertQuantity: z.number(),
+  unitCost: z.number(),
 });
 
-export type ProductCategory = z.infer<typeof productCategorySchema>;
+export type CreateIngredientCommand = z.infer<
+  typeof createIngredientCommandSchema
+>;
 
-// The full inventory item (for the table and form) can include the full category
-export const inventoryItemSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string(),
-  category: productCategorySchema,
-  price: z.number(),
+// Restock Command for PATCH requests
+export const restockCommandSchema = z.object({
   quantity: z.number(),
-  weightInGrams: z.number(),
-  countable: z.boolean(),
-  minimalValue: z.number(),
-  lowStock: z.boolean(),
 });
 
-export type InventoryItem = z.infer<typeof inventoryItemSchema>;
+export type RestockCommand = z.infer<typeof restockCommandSchema>;

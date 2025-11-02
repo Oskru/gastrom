@@ -1,5 +1,5 @@
 // src/pages/EmployeesPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -16,106 +16,72 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Checkbox,
   Snackbar,
+  IconButton,
+  Tooltip,
+  Typography,
 } from '@mui/material';
+import {
+  Delete as DeleteIcon,
+  AttachMoney as MoneyIcon,
+  AccessTime as TimeIcon,
+} from '@mui/icons-material';
 import MainContainer from '../components/main-container';
-import { apiInstance } from '../utils/api-instance';
-import { Employee } from '../schemas/employee';
+import { EmployeeDto, CreateEmployeeCommand } from '../schemas/employee';
+import {
+  useEmployees,
+  useCreateEmployee,
+  useUpdateEmployeeHours,
+  useGenerateEmployeeSalary,
+  useDeleteEmployee,
+} from '../hooks/use-employees';
 
-// For the form, we use a separate type. For the "authorities" field,
-// we accept a comma-separated string which we later convert to an array.
-interface FormState {
-  id?: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  role: string;
-  position: string;
-  enabled: boolean;
-  accountNonExpired: boolean;
-  accountNonLocked: boolean;
-  credentialsNonExpired: boolean;
-  authorities: string;
-  username: string;
-}
-
-const defaultFormState: FormState = {
+const defaultFormState: CreateEmployeeCommand = {
   email: '',
   firstName: '',
   lastName: '',
-  password: '',
-  role: '',
-  position: '',
-  enabled: true,
-  accountNonExpired: true,
-  accountNonLocked: true,
-  credentialsNonExpired: true,
-  authorities: '',
-  username: '',
+  phoneNumber: '',
+  salaryPerHour: 0,
 };
 
 const EmployeesPage: React.FC = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [formState, setFormState] = useState<FormState>(defaultFormState);
-  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [openHoursDialog, setOpenHoursDialog] = useState<boolean>(false);
+  const [formState, setFormState] =
+    useState<CreateEmployeeCommand>(defaultFormState);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeDto | null>(
+    null
+  );
+  const [hoursToUpdate, setHoursToUpdate] = useState<number>(0);
   const [snackbarMsg, setSnackbarMsg] = useState<string>('');
 
-  // Fetch all employees
-  const fetchEmployees = async () => {
-    setLoading(true);
-    try {
-      const response = await apiInstance.get<Employee[]>('/employees');
-      setEmployees(response.data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch employees');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+  // Use React Query hooks
+  const { data: employees = [], isLoading: loading } = useEmployees();
+  const createEmployee = useCreateEmployee();
+  const updateHours = useUpdateEmployeeHours();
+  const generateSalary = useGenerateEmployeeSalary();
+  const deleteEmployee = useDeleteEmployee();
 
   // Open dialog for creating a new employee
   const handleOpenDialogForCreate = () => {
-    setIsEdit(false);
     setFormState(defaultFormState);
     setOpenDialog(true);
   };
 
-  // Open dialog for editing an existing employee
-  const handleOpenDialogForEdit = (employee: Employee) => {
-    setIsEdit(true);
-    // Convert the authorities array into a comma-separated string
-    const authoritiesString = employee.authorities
-      .map(auth => auth.authority)
-      .join(', ');
-    setFormState({
-      id: employee.id,
-      email: employee.email,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      password: employee.password,
-      role: employee.role,
-      position: employee.position,
-      enabled: employee.enabled,
-      accountNonExpired: employee.accountNonExpired,
-      accountNonLocked: employee.accountNonLocked,
-      credentialsNonExpired: employee.credentialsNonExpired,
-      authorities: authoritiesString,
-      username: employee.username,
-    });
-    setOpenDialog(true);
+  // Open dialog for updating hours
+  const handleOpenHoursDialog = (employee: EmployeeDto) => {
+    setSelectedEmployee(employee);
+    setHoursToUpdate(0);
+    setOpenHoursDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  const handleCloseHoursDialog = () => {
+    setOpenHoursDialog(false);
   };
 
   // Handle text field changes
@@ -125,58 +91,47 @@ const EmployeesPage: React.FC = () => {
     const { name, value } = e.target;
     setFormState(prev => ({
       ...prev,
-      // For numeric or boolean fields, you could add conversion logic if needed.
-      [name]: value,
+      [name]: name === 'salaryPerHour' ? Number(value) : value,
     }));
   };
 
-  // Handle checkbox changes (for boolean fields)
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormState(prev => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
-
-  // Submit form to create or update an employee
+  // Submit form to create employee
   const handleSubmit = async () => {
     try {
-      // Convert the comma-separated authorities string to an array of objects
-      const authoritiesArray = formState.authorities
-        .split(',')
-        .map(a => ({ authority: a.trim() }))
-        .filter(a => a.authority);
-
-      const payload = {
-        email: formState.email,
-        firstName: formState.firstName,
-        lastName: formState.lastName,
-        password: formState.password,
-        role: formState.role,
-        position: formState.position,
-        enabled: formState.enabled,
-        accountNonExpired: formState.accountNonExpired,
-        accountNonLocked: formState.accountNonLocked,
-        credentialsNonExpired: formState.credentialsNonExpired,
-        authorities: authoritiesArray,
-        username: formState.username,
-      };
-
-      if (isEdit && formState.id !== undefined) {
-        await apiInstance.put(`/employees/${formState.id}`, {
-          id: formState.id,
-          ...payload,
-        });
-        setSnackbarMsg('Employee updated successfully');
-      } else {
-        await apiInstance.post('/employees', payload);
-        setSnackbarMsg('Employee created successfully');
-      }
+      await createEmployee.mutateAsync(formState);
+      setSnackbarMsg('Employee created successfully');
       handleCloseDialog();
-      fetchEmployees();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save employee');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to save employee');
+    }
+  };
+
+  // Update employee hours
+  const handleUpdateHours = async () => {
+    if (!selectedEmployee) return;
+    try {
+      await updateHours.mutateAsync({
+        id: selectedEmployee.id,
+        hours: hoursToUpdate,
+      });
+      setSnackbarMsg('Hours updated successfully');
+      handleCloseHoursDialog();
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to update hours');
+    }
+  };
+
+  // Generate salary
+  const handleGenerateSalary = async (id: number) => {
+    if (!window.confirm('Generate salary for this employee?')) return;
+    try {
+      await generateSalary.mutateAsync(id);
+      setSnackbarMsg('Salary generated successfully');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to generate salary');
     }
   };
 
@@ -186,11 +141,11 @@ const EmployeesPage: React.FC = () => {
       return;
     }
     try {
-      await apiInstance.delete(`/employees/${id}`);
+      await deleteEmployee.mutateAsync(id);
       setSnackbarMsg('Employee deleted successfully');
-      fetchEmployees();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete employee');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to delete employee');
     }
   };
 
@@ -200,26 +155,26 @@ const EmployeesPage: React.FC = () => {
         variant='contained'
         color='primary'
         onClick={handleOpenDialogForCreate}
+        sx={{ mb: 2 }}
       >
         Add Employee
       </Button>
+
       {loading ? (
-        <Box display='flex' justifyContent='center' m={2}>
+        <Box display='flex' justifyContent='center' mt={4}>
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ marginTop: 2 }}>
+        <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
-                <TableCell>First Name</TableCell>
-                <TableCell>Last Name</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Position</TableCell>
-                <TableCell>Enabled</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell>Salary/Hour</TableCell>
+                <TableCell>Hours Worked</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -227,39 +182,45 @@ const EmployeesPage: React.FC = () => {
               {employees.map(emp => (
                 <TableRow key={emp.id}>
                   <TableCell>{emp.id}</TableCell>
-                  <TableCell>{emp.email}</TableCell>
-                  <TableCell>{emp.firstName}</TableCell>
-                  <TableCell>{emp.lastName}</TableCell>
-                  <TableCell>{emp.username}</TableCell>
-                  <TableCell>{emp.role}</TableCell>
-                  <TableCell>{emp.position}</TableCell>
                   <TableCell>
-                    <Checkbox checked={emp.enabled} disabled />
+                    {emp.firstName} {emp.lastName}
                   </TableCell>
+                  <TableCell>{emp.email}</TableCell>
+                  <TableCell>{emp.phoneNumber}</TableCell>
+                  <TableCell>${emp.salaryPerHour.toFixed(2)}</TableCell>
+                  <TableCell>{emp.hoursWorked}</TableCell>
                   <TableCell>
-                    <Button
-                      variant='outlined'
-                      color='primary'
-                      size='small'
-                      onClick={() => handleOpenDialogForEdit(emp)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant='outlined'
-                      color='secondary'
-                      size='small'
-                      onClick={() => handleDelete(emp.id)}
-                      sx={{ ml: 1 }}
-                    >
-                      Delete
-                    </Button>
+                    <Tooltip title='Update Hours'>
+                      <IconButton
+                        size='small'
+                        onClick={() => handleOpenHoursDialog(emp)}
+                      >
+                        <TimeIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Generate Salary'>
+                      <IconButton
+                        size='small'
+                        onClick={() => handleGenerateSalary(emp.id)}
+                      >
+                        <MoneyIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Delete'>
+                      <IconButton
+                        size='small'
+                        color='error'
+                        onClick={() => handleDelete(emp.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
               {employees.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} align='center'>
+                  <TableCell colSpan={7} align='center'>
                     No employees found.
                   </TableCell>
                 </TableRow>
@@ -276,17 +237,9 @@ const EmployeesPage: React.FC = () => {
         fullWidth
         maxWidth='sm'
       >
-        <DialogTitle>{isEdit ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
+        <DialogTitle>Add Employee</DialogTitle>
         <DialogContent>
           <Box component='form' sx={{ mt: 2 }} noValidate>
-            <TextField
-              fullWidth
-              label='Email'
-              name='email'
-              value={formState.email}
-              onChange={handleFormChange}
-              margin='normal'
-            />
             <TextField
               fullWidth
               label='First Name'
@@ -305,84 +258,77 @@ const EmployeesPage: React.FC = () => {
             />
             <TextField
               fullWidth
-              label='Username'
-              name='username'
-              value={formState.username}
+              label='Email'
+              name='email'
+              type='email'
+              value={formState.email}
               onChange={handleFormChange}
               margin='normal'
             />
             <TextField
               fullWidth
-              label='Password'
-              name='password'
-              type='password'
-              value={formState.password}
+              label='Phone Number'
+              name='phoneNumber'
+              value={formState.phoneNumber}
               onChange={handleFormChange}
               margin='normal'
             />
             <TextField
               fullWidth
-              label='Role'
-              name='role'
-              value={formState.role}
+              label='Salary Per Hour'
+              name='salaryPerHour'
+              type='number'
+              value={formState.salaryPerHour}
               onChange={handleFormChange}
               margin='normal'
             />
-            <TextField
-              fullWidth
-              label='Position'
-              name='position'
-              value={formState.position}
-              onChange={handleFormChange}
-              margin='normal'
-            />
-            <TextField
-              fullWidth
-              label='Authorities (comma separated)'
-              name='authorities'
-              value={formState.authorities}
-              onChange={handleFormChange}
-              margin='normal'
-            />
-
-            <Box display='flex' alignItems='center' mt={2}>
-              <Checkbox
-                name='enabled'
-                checked={formState.enabled}
-                onChange={handleCheckboxChange}
-              />
-              <span>Enabled</span>
-            </Box>
-            <Box display='flex' alignItems='center'>
-              <Checkbox
-                name='accountNonExpired'
-                checked={formState.accountNonExpired}
-                onChange={handleCheckboxChange}
-              />
-              <span>Account Non-Expired</span>
-            </Box>
-            <Box display='flex' alignItems='center'>
-              <Checkbox
-                name='accountNonLocked'
-                checked={formState.accountNonLocked}
-                onChange={handleCheckboxChange}
-              />
-              <span>Account Non-Locked</span>
-            </Box>
-            <Box display='flex' alignItems='center'>
-              <Checkbox
-                name='credentialsNonExpired'
-                checked={formState.credentialsNonExpired}
-                onChange={handleCheckboxChange}
-              />
-              <span>Credentials Non-Expired</span>
-            </Box>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button onClick={handleSubmit} variant='contained' color='primary'>
-            {isEdit ? 'Update' : 'Create'}
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Update Hours Dialog */}
+      <Dialog
+        open={openHoursDialog}
+        onClose={handleCloseHoursDialog}
+        fullWidth
+        maxWidth='xs'
+      >
+        <DialogTitle>Update Hours Worked</DialogTitle>
+        <DialogContent>
+          {selectedEmployee && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant='body1' gutterBottom>
+                Employee: {selectedEmployee.firstName}{' '}
+                {selectedEmployee.lastName}
+              </Typography>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
+                Current Hours: {selectedEmployee.hoursWorked}
+              </Typography>
+              <TextField
+                fullWidth
+                label='Hours to Add'
+                type='number'
+                value={hoursToUpdate}
+                onChange={e => setHoursToUpdate(Number(e.target.value))}
+                margin='normal'
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseHoursDialog}>Cancel</Button>
+          <Button
+            onClick={handleUpdateHours}
+            variant='contained'
+            color='primary'
+          >
+            Update
           </Button>
         </DialogActions>
       </Dialog>

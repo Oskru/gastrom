@@ -30,22 +30,19 @@ import {
   Cell,
 } from 'recharts';
 import {
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
   AttachMoney as AttachMoneyIcon,
   Inventory as InventoryIcon,
   ShoppingCart as ShoppingCartIcon,
   CreditCard as CreditCardIcon,
 } from '@mui/icons-material';
 import MainContainer from '../components/main-container';
-import { useLowStockItems } from '../hooks/use-inventory';
+import { useLowStockIngredients } from '../hooks/use-inventory';
 import {
-  useTodayTransactions,
   useRecentTransactions,
   useDailySalesData,
   useSalesByPaymentMethod,
-  useTransactions,
 } from '../hooks/use-transactions';
+import { useStatistics } from '../hooks/use-statistics';
 
 const COLORS = [
   '#0088FE',
@@ -67,7 +64,7 @@ const HomePage: React.FC = () => {
     data: lowStockItems = [],
     isLoading: loadingInventory,
     refetch: refetchInventory,
-  } = useLowStockItems();
+  } = useLowStockIngredients();
 
   const {
     data: recentTransactions = [],
@@ -75,11 +72,12 @@ const HomePage: React.FC = () => {
     refetch: refetchRecentTransactions,
   } = useRecentTransactions(5);
 
-  const {
-    totalSalesToday,
-    totalTransactionsToday,
-    isLoading: loadingTodayTransactions,
-  } = useTodayTransactions();
+  // Fetch statistics from the API
+  const { data: dailyStats, isLoading: loadingDailyStats } =
+    useStatistics('DAILY');
+
+  const { data: overallStats, isLoading: loadingOverallStats } =
+    useStatistics('OVERALL');
 
   const { data: dailySalesData = [], isLoading: loadingDailySales } =
     useDailySalesData();
@@ -89,41 +87,10 @@ const HomePage: React.FC = () => {
     isLoading: loadingPaymentMethodData,
   } = useSalesByPaymentMethod();
 
-  const { data: allTransactions = [], isLoading: loadingAllTransactions } =
-    useTransactions();
-
-  // Calculate some additional metrics
-  const totalSales = allTransactions.reduce(
-    (sum, tx) => sum + tx.totalAmount,
-    0
-  );
-  const averageOrderValue = totalSales / (allTransactions.length || 1);
-
-  // Get sales for yesterday to calculate trend
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayString = yesterday.toISOString().slice(0, 10);
-  const yesterdaySales = allTransactions
-    .filter(tx => tx.date === yesterdayString)
-    .reduce((sum, tx) => sum + tx.totalAmount, 0);
-
-  const salesTrend = yesterdaySales
-    ? ((totalSalesToday - yesterdaySales) / yesterdaySales) * 100
-    : 0;
-
-  // Find the most popular payment method
-  let mostPopularMethod = { method: 'None', count: 0 };
-  const methodCounts: Record<string, number> = {};
-
-  allTransactions.forEach(tx => {
-    methodCounts[tx.paymentMethod] = (methodCounts[tx.paymentMethod] || 0) + 1;
-    if (methodCounts[tx.paymentMethod] > mostPopularMethod.count) {
-      mostPopularMethod = {
-        method: tx.paymentMethod,
-        count: methodCounts[tx.paymentMethod],
-      };
-    }
-  });
+  // Use statistics data for metrics
+  const totalSalesToday = dailyStats?.totalRevenue || 0;
+  const totalTransactionsToday = dailyStats?.transactionCount || 0;
+  const averageOrderValue = overallStats?.averageOrderValue || 0;
 
   // Handle refresh of all data
   const refreshDashboard = () => {
@@ -154,35 +121,16 @@ const HomePage: React.FC = () => {
                     Today's Sales
                   </Typography>
                 </Box>
-                {loadingTodayTransactions ? (
+                {loadingDailyStats ? (
                   <CircularProgress size={24} />
                 ) : (
                   <>
                     <Typography variant='h4' color='primary' gutterBottom>
                       ${totalSalesToday.toFixed(2)}
                     </Typography>
-                    <Box display='flex' alignItems='center'>
-                      {salesTrend > 0 ? (
-                        <Chip
-                          icon={<TrendingUpIcon />}
-                          label={`+${salesTrend.toFixed(1)}%`}
-                          color='success'
-                          size='small'
-                          sx={{ mr: 1 }}
-                        />
-                      ) : (
-                        <Chip
-                          icon={<TrendingDownIcon />}
-                          label={`${salesTrend.toFixed(1)}%`}
-                          color='error'
-                          size='small'
-                          sx={{ mr: 1 }}
-                        />
-                      )}
-                      <Typography variant='body2' color='text.secondary'>
-                        vs yesterday
-                      </Typography>
-                    </Box>
+                    <Typography variant='body2' color='text.secondary'>
+                      Total revenue today
+                    </Typography>
                   </>
                 )}
               </CardContent>
@@ -199,7 +147,7 @@ const HomePage: React.FC = () => {
                     Today's Orders
                   </Typography>
                 </Box>
-                {loadingTodayTransactions ? (
+                {loadingDailyStats ? (
                   <CircularProgress size={24} />
                 ) : (
                   <>
@@ -225,7 +173,7 @@ const HomePage: React.FC = () => {
                     Avg Order Value
                   </Typography>
                 </Box>
-                {loadingAllTransactions ? (
+                {loadingOverallStats ? (
                   <CircularProgress size={24} />
                 ) : (
                   <>
@@ -353,15 +301,6 @@ const HomePage: React.FC = () => {
                   <Typography>No payment data available</Typography>
                 </Box>
               )}
-              {mostPopularMethod.method !== 'None' && (
-                <Box mt={2}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant='body2'>
-                    Most popular: <strong>{mostPopularMethod.method}</strong> (
-                    {mostPopularMethod.count} transactions)
-                  </Typography>
-                </Box>
-              )}
             </Paper>
           </Grid>
         </Grid>
@@ -393,22 +332,19 @@ const HomePage: React.FC = () => {
                       color='text.secondary'
                       gutterBottom
                     >
-                      {item.description.substring(0, 60)}
-                      {item.description.length > 60 ? '...' : ''}
+                      Unit: {item.unit}
                     </Typography>
                     <Box display='flex' justifyContent='space-between' mt={1}>
                       <Typography variant='body2'>
                         Current:{' '}
                         <strong>
-                          {item.countable
-                            ? item.quantity
-                            : `${item.weightInGrams}g`}
+                          {item.stockQuantity} {item.unit}
                         </strong>
                       </Typography>
                       <Typography variant='body2'>
-                        Minimum:{' '}
+                        Alert:{' '}
                         <strong>
-                          {item.minimalValue + (item.countable ? '' : 'g')}
+                          {item.alertQuantity} {item.unit}
                         </strong>
                       </Typography>
                     </Box>
@@ -447,7 +383,9 @@ const HomePage: React.FC = () => {
                       <Typography variant='body2' color='text.secondary'>
                         Date:
                       </Typography>
-                      <Typography variant='body2'>{tx.date}</Typography>
+                      <Typography variant='body2'>
+                        {new Date(tx.dateTime).toLocaleDateString()}
+                      </Typography>
                     </Box>
                     <Box display='flex' justifyContent='space-between'>
                       <Typography variant='body2' color='text.secondary'>
@@ -457,9 +395,7 @@ const HomePage: React.FC = () => {
                         label={tx.paymentMethod}
                         size='small'
                         color={
-                          tx.paymentMethod === 'Credit Card'
-                            ? 'primary'
-                            : 'default'
+                          tx.paymentMethod === 'CARD' ? 'primary' : 'default'
                         }
                         variant='outlined'
                       />
