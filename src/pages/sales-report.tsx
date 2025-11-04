@@ -48,7 +48,7 @@ import {
 import {
   useDailySalesData,
   useSalesByPaymentMethod,
-  useTransactions,
+  useTransactionsPaged,
 } from '../hooks/use-transactions';
 import MainContainer from '../components/main-container.tsx';
 
@@ -108,11 +108,14 @@ const SalesReportPage: React.FC = () => {
     refetch: refetchPaymentMethods,
   } = useSalesByPaymentMethod();
 
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 50;
   const {
-    data: transactions = [],
+    data: pageData,
     isLoading: loadingTransactions,
     refetch: refetchTransactions,
-  } = useTransactions();
+  } = useTransactionsPaged(page, PAGE_SIZE);
+  const transactions = React.useMemo(() => pageData?.content || [], [pageData]);
 
   // Filter daily sales data based on selected time range
   const filteredDailySalesData = React.useMemo(() => {
@@ -201,6 +204,13 @@ const SalesReportPage: React.FC = () => {
     setSnackbarMsg('Sales data refreshed successfully');
   };
 
+  const handleNextPage = () => {
+    if (pageData && page < pageData.totalPages - 1) setPage(p => p + 1);
+  };
+  const handlePrevPage = () => {
+    if (page > 0) setPage(p => p - 1);
+  };
+
   return (
     <MainContainer title='Sales Reports'>
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -243,6 +253,29 @@ const SalesReportPage: React.FC = () => {
 
       {/* Overview Tab */}
       <TabPanel value={tabValue} index={0}>
+        {pageData && (
+          <Box display='flex' justifyContent='flex-end' mb={2} gap={1}>
+            <Typography variant='body2' sx={{ mr: 'auto' }}>
+              Transactions Page {pageData.page + 1} / {pageData.totalPages}
+            </Typography>
+            <Button
+              size='small'
+              variant='outlined'
+              onClick={handlePrevPage}
+              disabled={page === 0 || loadingTransactions}
+            >
+              Prev
+            </Button>
+            <Button
+              size='small'
+              variant='outlined'
+              onClick={handleNextPage}
+              disabled={!pageData || pageData.last || loadingTransactions}
+            >
+              Next
+            </Button>
+          </Box>
+        )}
         <Grid container spacing={3}>
           {/* Sales Summary Cards */}
           <Grid item xs={12}>

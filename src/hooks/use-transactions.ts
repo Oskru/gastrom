@@ -1,8 +1,22 @@
+/**
+ * Transaction hooks
+ * ----------------------------------------------
+ * The backend now exposes a paginated /transactions endpoint that requires
+ * page & size parameters (Spring Data style). We provide:
+ *  - useTransactionsPaged(page,size): returns normalized page metadata + content
+ *  - useTransactions(): backward-compatible convenience wrapper returning just an array
+ *    (first page only, with a large default size). For analytics spanning all
+ *    historical transactions, we may later implement a batched "useAllTransactions"
+ *    that iteratively loads every page. Current dashboard/report components rely on
+ *    a single page slice which is sufficient for recent insights.
+ */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiInstance } from '../utils/api-instance';
 import {
   TransactionDto,
   CreateTransactionCommand,
+  PageTransactionDto,
+  normalizeTransactionPage,
 } from '../schemas/transaction';
 
 // Query keys for cache management
@@ -13,18 +27,38 @@ export const transactionKeys = {
     [...transactionKeys.lists(), filters] as const,
   details: () => [...transactionKeys.all, 'detail'] as const,
   detail: (id: number) => [...transactionKeys.details(), id] as const,
+  pages: () => [...transactionKeys.all, 'page'] as const,
+  page: (page: number, size: number) =>
+    [...transactionKeys.pages(), { page, size }] as const,
 };
 
-// Fetch all transactions
-export const useTransactions = (options = {}) => {
+// Fetch a single page of transactions (generic paged hook)
+export const useTransactionsPaged = (
+  page: number,
+  size: number,
+  options: Record<string, unknown> = {}
+) => {
   return useQuery({
-    queryKey: transactionKeys.lists(),
+    queryKey: transactionKeys.page(page, size),
     queryFn: async () => {
-      const response = await apiInstance.get<TransactionDto[]>('/transactions');
-      return response.data;
+      const response = await apiInstance.get<PageTransactionDto>(
+        `/transactions?page=${page}&size=${size}`
+      );
+      return normalizeTransactionPage(response.data);
     },
     ...options,
   });
+};
+
+// Backward-compatible hook returning just an array (first page, large size)
+// NOTE: For full historical analytics this may need iteration across all pages.
+export const useTransactions = (
+  options: Record<string, unknown> = {},
+  page: number = 0,
+  size: number = 200
+) => {
+  const { data: pageData, ...rest } = useTransactionsPaged(page, size, options);
+  return { data: pageData?.content || [], pageData, ...rest };
 };
 
 // Fetch today's transactions
