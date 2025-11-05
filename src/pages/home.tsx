@@ -25,6 +25,10 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -51,10 +55,13 @@ import { useDashboardConfig } from '../hooks/use-dashboard-config';
 import { TileToolbar } from '../components/dashboard/TileToolbar';
 import { SortableTile } from '../components/dashboard/SortableTile';
 import { DashboardTileType } from '../types/dashboard';
+import { StatisticsRange } from '../schemas/statistics';
+import { TimeframeContext } from '../context/timeframe-context';
 
 const HomePage: React.FC = () => {
   const [isCustomizeMode, setIsCustomizeMode] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [timeframe, setTimeframe] = useState<StatisticsRange>('OVERALL');
 
   const { config, addTile, removeTile, updateTileOrder, resetToDefault } =
     useDashboardConfig();
@@ -120,26 +127,45 @@ const HomePage: React.FC = () => {
             gap: 2,
           }}
         >
-          <ToggleButtonGroup
-            value={isCustomizeMode ? 'edit' : 'view'}
-            exclusive
-            onChange={(_, value) => {
-              if (value !== null) {
-                setIsCustomizeMode(value === 'edit');
-              }
-            }}
-            aria-label='dashboard mode'
-            size='small'
-          >
-            <ToggleButton value='view' aria-label='view mode'>
-              <VisibilityIcon sx={{ mr: 1 }} fontSize='small' />
-              View
-            </ToggleButton>
-            <ToggleButton value='edit' aria-label='edit mode'>
-              <EditIcon sx={{ mr: 1 }} fontSize='small' />
-              Customize
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <ToggleButtonGroup
+              value={isCustomizeMode ? 'edit' : 'view'}
+              exclusive
+              onChange={(_, value) => {
+                if (value !== null) {
+                  setIsCustomizeMode(value === 'edit');
+                }
+              }}
+              aria-label='dashboard mode'
+              size='small'
+            >
+              <ToggleButton value='view' aria-label='view mode'>
+                <VisibilityIcon sx={{ mr: 1 }} fontSize='small' />
+                View
+              </ToggleButton>
+              <ToggleButton value='edit' aria-label='edit mode'>
+                <EditIcon sx={{ mr: 1 }} fontSize='small' />
+                Customize
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            <FormControl sx={{ minWidth: 150 }} size='small'>
+              <InputLabel id='dashboard-timeframe-label'>Timeframe</InputLabel>
+              <Select
+                labelId='dashboard-timeframe-label'
+                id='dashboard-timeframe-select'
+                value={timeframe}
+                label='Timeframe'
+                onChange={e => setTimeframe(e.target.value as StatisticsRange)}
+              >
+                <MenuItem value='DAILY'>Daily</MenuItem>
+                <MenuItem value='WEEKLY'>Weekly</MenuItem>
+                <MenuItem value='MONTHLY'>Monthly</MenuItem>
+                <MenuItem value='YEARLY'>Yearly</MenuItem>
+                <MenuItem value='OVERALL'>Overall</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
 
           {isCustomizeMode && (
             <Button
@@ -172,28 +198,30 @@ const HomePage: React.FC = () => {
         )}
 
         {/* Dashboard Tiles with Drag & Drop */}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={config.tiles.map(tile => tile.id)}
-            strategy={rectSortingStrategy}
+        <TimeframeContext.Provider value={{ timeframe }}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <Grid container spacing={3}>
-              {config.tiles.map(tile => (
-                <Grid item xs={12} sm={6} md={tile.width} key={tile.id}>
-                  <SortableTile
-                    tile={tile}
-                    isCustomizeMode={isCustomizeMode}
-                    onRemove={handleRemoveTile}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={config.tiles.map(tile => tile.id)}
+              strategy={rectSortingStrategy}
+            >
+              <Grid container spacing={3}>
+                {config.tiles.map(tile => (
+                  <Grid item xs={12} sm={6} md={tile.width} key={tile.id}>
+                    <SortableTile
+                      tile={tile}
+                      isCustomizeMode={isCustomizeMode}
+                      onRemove={handleRemoveTile}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </SortableContext>
+          </DndContext>
+        </TimeframeContext.Provider>
 
         {/* Empty State */}
         {config.tiles.length === 0 && (

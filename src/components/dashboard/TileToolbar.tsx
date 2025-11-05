@@ -10,6 +10,16 @@ import {
   Warning,
   Receipt,
   Add as AddIcon,
+  TrendingUp,
+  ShowChart,
+  MoneyOff,
+  Kitchen,
+  Business,
+  LocalAtm,
+  Schedule,
+  Percent,
+  ShoppingBasket,
+  BarChart,
 } from '@mui/icons-material';
 import { DashboardTileType, TILE_DEFINITIONS } from '../../types/dashboard';
 
@@ -27,6 +37,16 @@ const getIcon = (iconName: string) => {
     PieChart: <PieChart />,
     Warning: <Warning />,
     Receipt: <Receipt />,
+    TrendingUp: <TrendingUp />,
+    ShowChart: <ShowChart />,
+    MoneyOff: <MoneyOff />,
+    Kitchen: <Kitchen />,
+    Business: <Business />,
+    LocalAtm: <LocalAtm />,
+    Schedule: <Schedule />,
+    Percent: <Percent />,
+    ShoppingBasket: <ShoppingBasket />,
+    BarChart: <BarChart />,
   };
   return iconMap[iconName] || <AddIcon />;
 };
@@ -49,8 +69,8 @@ export const TileToolbar: React.FC<TileToolbarProps> = ({
         Add Tiles to Your Dashboard
       </Typography>
       <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
-        Click on a tile to add it to your dashboard. You can add multiple
-        instances of the same tile.
+        Click on a tile to add it to your dashboard. Each tile can only be added
+        once.
       </Typography>
       <Divider sx={{ mb: 2 }} />
       <Grid container spacing={2}>
@@ -61,16 +81,19 @@ export const TileToolbar: React.FC<TileToolbarProps> = ({
               <Paper
                 sx={{
                   p: 2,
-                  cursor: 'pointer',
+                  cursor: isAdded ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s',
                   border: '2px solid transparent',
+                  opacity: isAdded ? 0.5 : 1,
                   '&:hover': {
-                    borderColor: 'primary.main',
-                    transform: 'translateY(-2px)',
-                    boxShadow: 3,
+                    borderColor: isAdded ? 'transparent' : 'primary.main',
+                    transform: isAdded ? 'none' : 'translateY(-2px)',
+                    boxShadow: isAdded ? 0 : 3,
                   },
                 }}
-                onClick={() => onAddTile(tile.type, tile.defaultWidth)}
+                onClick={() =>
+                  !isAdded && onAddTile(tile.type, tile.defaultWidth)
+                }
               >
                 <Box display='flex' alignItems='center' mb={1}>
                   <Box

@@ -20,12 +20,25 @@ import {
   Inventory as InventoryIcon,
   ShoppingCart as ShoppingCartIcon,
   CreditCard as CreditCardIcon,
+  TrendingUp as TrendingUpIcon,
+  ShowChart as ShowChartIcon,
+  MoneyOff as MoneyOffIcon,
+  Kitchen as KitchenIcon,
+  Business as BusinessIcon,
+  LocalAtm as LocalAtmIcon,
+  Schedule as ScheduleIcon,
+  Percent as PercentIcon,
+  ShoppingBasket as ShoppingBasketIcon,
 } from '@mui/icons-material';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { useLowStockIngredients } from '../../hooks/use-inventory';
 import { useRecentTransactions } from '../../hooks/use-transactions';
-import { useStatistics } from '../../hooks/use-statistics';
+import {
+  useStatistics,
+  useExpandedStatistics,
+} from '../../hooks/use-statistics';
 import { DashboardTileType } from '../../types/dashboard';
+import { useTimeframe } from '../../context/timeframe-context';
 
 const COLORS = [
   '#0088FE',
@@ -44,10 +57,11 @@ const TileWrapper: React.FC<TileWrapperProps> = ({ children }) => {
   return <Box sx={{ height: '100%' }}>{children}</Box>;
 };
 
-// Today's Sales Tile
-export const TodaySalesTile: React.FC = () => {
-  const { data: dailyStats, isLoading } = useStatistics('DAILY');
-  const totalSalesToday = dailyStats?.totalRevenue || 0;
+// Total Sales Tile
+export const TotalSalesTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: stats, isLoading } = useStatistics(timeframe);
+  const totalSales = stats?.totalRevenue || 0;
 
   return (
     <TileWrapper>
@@ -56,7 +70,7 @@ export const TodaySalesTile: React.FC = () => {
           <Box display='flex' alignItems='center' mb={2}>
             <AttachMoneyIcon color='primary' sx={{ mr: 1 }} />
             <Typography variant='h6' component='div'>
-              Today's Sales
+              Total Sales
             </Typography>
           </Box>
           {isLoading ? (
@@ -64,10 +78,10 @@ export const TodaySalesTile: React.FC = () => {
           ) : (
             <>
               <Typography variant='h4' color='primary' gutterBottom>
-                ${totalSalesToday.toFixed(2)}
+                ${totalSales.toFixed(2)}
               </Typography>
               <Typography variant='body2' color='text.secondary'>
-                Total revenue today
+                Total revenue for selected period
               </Typography>
             </>
           )}
@@ -77,10 +91,11 @@ export const TodaySalesTile: React.FC = () => {
   );
 };
 
-// Today's Orders Tile
-export const TodayOrdersTile: React.FC = () => {
-  const { data: dailyStats, isLoading } = useStatistics('DAILY');
-  const totalTransactionsToday = dailyStats?.transactionCount || 0;
+// Total Orders Tile
+export const TotalOrdersTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: stats, isLoading } = useStatistics(timeframe);
+  const totalTransactions = stats?.transactionCount || 0;
 
   return (
     <TileWrapper>
@@ -89,7 +104,7 @@ export const TodayOrdersTile: React.FC = () => {
           <Box display='flex' alignItems='center' mb={2}>
             <ShoppingCartIcon color='primary' sx={{ mr: 1 }} />
             <Typography variant='h6' component='div'>
-              Today's Orders
+              Total Orders
             </Typography>
           </Box>
           {isLoading ? (
@@ -97,10 +112,10 @@ export const TodayOrdersTile: React.FC = () => {
           ) : (
             <>
               <Typography variant='h4' color='primary' gutterBottom>
-                {totalTransactionsToday}
+                {totalTransactions}
               </Typography>
               <Typography variant='body2' color='text.secondary'>
-                Total orders today
+                Total orders for selected period
               </Typography>
             </>
           )}
@@ -112,7 +127,8 @@ export const TodayOrdersTile: React.FC = () => {
 
 // Average Order Value Tile
 export const AvgOrderValueTile: React.FC = () => {
-  const { data: overallStats, isLoading } = useStatistics('OVERALL');
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
   const averageOrderValue = overallStats?.averageOrderValue || 0;
 
   return (
@@ -177,9 +193,10 @@ export const LowStockAlertTile: React.FC = () => {
 
 // Payment Methods Tile
 export const PaymentMethodsTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { data: overallStats } = useStatistics('OVERALL');
+  const { data: overallStats } = useStatistics(timeframe);
 
   const paymentMethodData = React.useMemo(() => {
     if (!overallStats) return [];
@@ -308,7 +325,7 @@ export const LowStockItemsTile: React.FC = () => {
 
 // Recent Transactions Tile
 export const RecentTransactionsTile: React.FC = () => {
-  const { data: recentTransactions = [], isLoading } = useRecentTransactions(5);
+  const { data: recentTransactions = [], isLoading } = useRecentTransactions(4);
 
   return (
     <TileWrapper>
@@ -368,6 +385,508 @@ export const RecentTransactionsTile: React.FC = () => {
   );
 };
 
+// Highest Order Tile
+export const HighestOrderTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const highestOrderValue = overallStats?.highestOrderValue || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <TrendingUpIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Highest Order
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                ${highestOrderValue.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Highest single order
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Total Profit Tile
+export const TotalProfitTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const totalProfit = overallStats?.totalProfit || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <ShowChartIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Total Profit
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                ${totalProfit.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Revenue minus expenses
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Total Expense Tile
+export const TotalExpenseTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const totalExpense = overallStats?.totalExpense || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <MoneyOffIcon color='error' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Total Expenses
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='error' gutterBottom>
+                ${totalExpense.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Sum of all costs
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Ingredient Costs Tile
+export const IngredientCostsTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const ingredientCosts = overallStats?.ingredientCosts || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <KitchenIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Ingredient Costs
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                ${ingredientCosts.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Total cost of ingredients
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Fixed Costs Tile
+export const FixedCostsTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const fixedCosts = overallStats?.fixedCosts || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <BusinessIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Fixed Costs
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                ${fixedCosts.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Total fixed operational costs
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Cash Income Tile
+export const CashIncomeTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const cashIncome = overallStats?.cashIncome || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <LocalAtmIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Cash Income
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                ${cashIncome.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Revenue from cash payments
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Card Income Tile
+export const CardIncomeTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const cardIncome = overallStats?.cardIncome || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <CreditCardIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Card Income
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                ${cardIncome.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Revenue from card payments
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Transaction Count Tile
+export const TransactionCountTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const transactionCount = overallStats?.transactionCount || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <ShoppingCartIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Total Transactions
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                {transactionCount}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Total number of transactions
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Last Transaction Tile
+export const LastTransactionTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: overallStats, isLoading } = useStatistics(timeframe);
+  const lastTransactionTime = overallStats?.lastTransactionTime;
+
+  const formattedTime = lastTransactionTime
+    ? new Date(lastTransactionTime).toLocaleString()
+    : 'N/A';
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <ScheduleIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Last Transaction
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h5' color='primary' gutterBottom>
+                {formattedTime}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Most recent sale
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Average Margin Tile
+export const AvgMarginTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: expandedStats, isLoading } = useExpandedStatistics(timeframe);
+  const avgMargin = expandedStats?.averageMarginPerTransaction || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <PercentIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Avg Margin
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                ${avgMargin.toFixed(2)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Average profit margin per transaction
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Average Items Per Order Tile
+export const AvgItemsPerOrderTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const { data: expandedStats, isLoading } = useExpandedStatistics(timeframe);
+  const avgItems = expandedStats?.averageItemsPerTransaction || 0;
+
+  return (
+    <TileWrapper>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box display='flex' alignItems='center' mb={2}>
+            <ShoppingBasketIcon color='primary' sx={{ mr: 1 }} />
+            <Typography variant='h6' component='div'>
+              Avg Items/Order
+            </Typography>
+          </Box>
+          {isLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Typography variant='h4' color='primary' gutterBottom>
+                {avgItems.toFixed(1)}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Average items per order
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TileWrapper>
+  );
+};
+
+// Top Products Revenue Tile (Bar Chart)
+export const TopProductsRevenueTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { data: expandedStats, isLoading } = useExpandedStatistics(timeframe);
+
+  const revenueData = React.useMemo(() => {
+    if (!expandedStats?.revenuePerProduct) return [];
+    return Object.entries(expandedStats.revenuePerProduct)
+      .map(([productId, amount]) => ({
+        productId,
+        amount,
+        name: `Product ${productId}`,
+      }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 10);
+  }, [expandedStats]);
+
+  return (
+    <TileWrapper>
+      <Paper sx={{ p: 3, height: '100%' }}>
+        <Typography variant='h6' gutterBottom>
+          Top Products by Revenue
+        </Typography>
+        {isLoading ? (
+          <Box display='flex' justifyContent='center' mt={4}>
+            <CircularProgress />
+          </Box>
+        ) : revenueData.length > 0 ? (
+          <ResponsiveContainer width='100%' height={300}>
+            <PieChart>
+              <Pie
+                data={revenueData}
+                dataKey='amount'
+                nameKey='name'
+                cx='50%'
+                cy='50%'
+                outerRadius={isMobile ? 80 : 100}
+                label={entry => entry.name}
+              >
+                {revenueData.map((_, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={value => [`$${Number(value).toFixed(2)}`, 'Revenue']}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+            <Typography>No product revenue data available</Typography>
+          </Box>
+        )}
+      </Paper>
+    </TileWrapper>
+  );
+};
+
+// Top Products Units Tile (Bar Chart)
+export const TopProductsUnitsTile: React.FC = () => {
+  const { timeframe } = useTimeframe();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { data: expandedStats, isLoading } = useExpandedStatistics(timeframe);
+
+  const unitsData = React.useMemo(() => {
+    if (!expandedStats?.unitsSoldPerProduct) return [];
+    return Object.entries(expandedStats.unitsSoldPerProduct)
+      .map(([productId, units]) => ({
+        productId,
+        units,
+        name: `Product ${productId}`,
+      }))
+      .sort((a, b) => b.units - a.units)
+      .slice(0, 10);
+  }, [expandedStats]);
+
+  return (
+    <TileWrapper>
+      <Paper sx={{ p: 3, height: '100%' }}>
+        <Typography variant='h6' gutterBottom>
+          Top Products by Units Sold
+        </Typography>
+        {isLoading ? (
+          <Box display='flex' justifyContent='center' mt={4}>
+            <CircularProgress />
+          </Box>
+        ) : unitsData.length > 0 ? (
+          <ResponsiveContainer width='100%' height={300}>
+            <PieChart>
+              <Pie
+                data={unitsData}
+                dataKey='units'
+                nameKey='name'
+                cx='50%'
+                cy='50%'
+                outerRadius={isMobile ? 80 : 100}
+                label={entry => entry.name}
+              >
+                {unitsData.map((_, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip formatter={value => [value, 'Units Sold']} />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+            <Typography>No product units data available</Typography>
+          </Box>
+        )}
+      </Paper>
+    </TileWrapper>
+  );
+};
+
 // Tile Factory - returns the correct tile component based on type
 interface DashboardTileProps {
   type: DashboardTileType;
@@ -377,16 +896,42 @@ export const DashboardTileComponent: React.FC<DashboardTileProps> = ({
   type,
 }) => {
   switch (type) {
-    case 'today-sales':
-      return <TodaySalesTile />;
-    case 'today-orders':
-      return <TodayOrdersTile />;
+    case 'total-sales':
+      return <TotalSalesTile />;
+    case 'total-orders':
+      return <TotalOrdersTile />;
     case 'avg-order-value':
       return <AvgOrderValueTile />;
+    case 'highest-order':
+      return <HighestOrderTile />;
+    case 'total-profit':
+      return <TotalProfitTile />;
+    case 'total-expense':
+      return <TotalExpenseTile />;
+    case 'ingredient-costs':
+      return <IngredientCostsTile />;
+    case 'fixed-costs':
+      return <FixedCostsTile />;
+    case 'cash-income':
+      return <CashIncomeTile />;
+    case 'card-income':
+      return <CardIncomeTile />;
+    case 'transaction-count':
+      return <TransactionCountTile />;
+    case 'last-transaction':
+      return <LastTransactionTile />;
+    case 'avg-margin':
+      return <AvgMarginTile />;
+    case 'avg-items-per-order':
+      return <AvgItemsPerOrderTile />;
     case 'low-stock-alert':
       return <LowStockAlertTile />;
     case 'payment-methods':
       return <PaymentMethodsTile />;
+    case 'top-products-revenue':
+      return <TopProductsRevenueTile />;
+    case 'top-products-units':
+      return <TopProductsUnitsTile />;
     case 'low-stock-items':
       return <LowStockItemsTile />;
     case 'recent-transactions':
