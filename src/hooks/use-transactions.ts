@@ -1,14 +1,29 @@
 /**
- * Transaction hooks
- * ----------------------------------------------
- * The backend now exposes a paginated /transactions endpoint that requires
- * page & size parameters (Spring Data style). We provide:
- *  - useTransactionsPaged(page,size): returns normalized page metadata + content
- *  - useTransactions(): backward-compatible convenience wrapper returning just an array
- *    (first page only, with a large default size). For analytics spanning all
- *    historical transactions, we may later implement a batched "useAllTransactions"
- *    that iteratively loads every page. Current dashboard/report components rely on
- *    a single page slice which is sufficient for recent insights.
+ * Transaction Hooks
+ * =================
+ *
+ * IMPORTANT: Transaction Endpoint Usage Restriction
+ * --------------------------------------------------
+ * Per project requirement, the /transactions endpoint is LIMITED to fetching the 5 most
+ * recent transactions for display on the dashboard ONLY. All sales analytics, aggregations,
+ * payment method distributions, and historical data analysis MUST use the /statistics and
+ * /statistics/expanded endpoints instead.
+ *
+ * Removed Hooks (use statistics endpoints instead):
+ * - useTodayTransactions → use useStatistics('DAILY')
+ * - useDailySalesData → use useStatistics with appropriate range
+ * - useSalesByPaymentMethod → use useStatistics (cashIncome/cardIncome fields)
+ * - useTransactionsByDateRange → use useStatistics with date range parameter
+ *
+ * Available Hooks:
+ * - useRecentTransactions(limit): Fetches recent transactions for dashboard display
+ * - useTransaction(id): Fetches single transaction details
+ * - useCreateTransaction(): Mutation for creating new transactions
+ * - useTransactionsPaged(page, size): Low-level paginated access (use sparingly)
+ *
+ * Backend Implementation:
+ * The backend exposes a paginated /transactions endpoint requiring page & size parameters
+ * (Spring Data style). useTransactionsPaged returns normalized page metadata + content.
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiInstance } from '../utils/api-instance';
@@ -50,59 +65,19 @@ export const useTransactionsPaged = (
   });
 };
 
-// Backward-compatible hook returning just an array (first page, large size)
-// NOTE: For full historical analytics this may need iteration across all pages.
-export const useTransactions = (
-  options: Record<string, unknown> = {},
-  page: number = 0,
-  size: number = 200
-) => {
-  const { data: pageData, ...rest } = useTransactionsPaged(page, size, options);
-  return { data: pageData?.content || [], pageData, ...rest };
-};
+// INTERNAL: No longer exported for analytics – only dashboard uses recent subset.
 
-// Fetch today's transactions
-export const useTodayTransactions = (options = {}) => {
-  const { data: allTransactions = [], ...rest } = useTransactions(options);
-
-  // Filter transactions that occurred today
-  const todayTransactions = allTransactions.filter(tx => {
-    const txDate = new Date(tx.dateTime);
-    const todayDate = new Date();
-    return (
-      txDate.getFullYear() === todayDate.getFullYear() &&
-      txDate.getMonth() === todayDate.getMonth() &&
-      txDate.getDate() === todayDate.getDate()
-    );
-  });
-
-  const totalSalesToday = todayTransactions.reduce(
-    (sum, tx) => sum + tx.totalAmount,
-    0
-  );
-
-  return {
-    ...rest,
-    data: todayTransactions,
-    totalSalesToday,
-    totalTransactionsToday: todayTransactions.length,
-  };
-};
-
-// Fetch recent transactions
+// Fetch only recent transactions (single page sized by limit) – primary allowed usage.
 export const useRecentTransactions = (limit = 5, options = {}) => {
-  const { data: allTransactions = [], ...rest } = useTransactions(options);
-
-  const sortedTransactions = [...allTransactions].sort((a, b) =>
+  const { data: pageData, ...rest } = useTransactionsPaged(0, limit, options);
+  const sorted = [...(pageData?.content || [])].sort((a, b) =>
     a.dateTime < b.dateTime ? 1 : -1
   );
-  const recentTransactions = sortedTransactions.slice(0, limit);
-
-  return {
-    ...rest,
-    data: recentTransactions,
-  };
+  return { ...rest, data: sorted.slice(0, limit) };
 };
+
+// Removed analytics hooks (useTodayTransactions, useDailySalesData, useSalesByPaymentMethod, etc.)
+// per requirement: only fetch limited recent transactions on dashboard – use statistics endpoints for analytics.
 
 // Fetch a single transaction by id
 export const useTransaction = (id: number, options = {}) => {
@@ -137,71 +112,4 @@ export const useCreateTransaction = () => {
   });
 };
 
-// Get transactions by date range
-export const useTransactionsByDateRange = (
-  startDate: string,
-  endDate: string,
-  options = {}
-) => {
-  const { data: allTransactions = [], ...rest } = useTransactions(options);
-
-  const filteredTransactions = allTransactions.filter(
-    tx => tx.dateTime >= startDate && tx.dateTime <= endDate
-  );
-
-  return {
-    ...rest,
-    data: filteredTransactions,
-  };
-};
-
-// Get sales data by payment method
-export const useSalesByPaymentMethod = (options = {}) => {
-  const { data: transactions = [], ...rest } = useTransactions(options);
-
-  const paymentMethodMap: Record<string, number> = {};
-  transactions.forEach(tx => {
-    const method = tx.paymentMethod;
-    if (paymentMethodMap[method]) {
-      paymentMethodMap[method] += tx.totalAmount;
-    } else {
-      paymentMethodMap[method] = tx.totalAmount;
-    }
-  });
-
-  const paymentMethodData = Object.entries(paymentMethodMap).map(
-    ([method, amount]) => ({
-      method,
-      amount,
-    })
-  );
-
-  return {
-    ...rest,
-    data: paymentMethodData,
-  };
-};
-
-// Get daily sales data
-export const useDailySalesData = (options = {}) => {
-  const { data: transactions = [], ...rest } = useTransactions(options);
-
-  const dailySalesMap: Record<string, number> = {};
-  transactions.forEach(tx => {
-    const date = tx.dateTime.split('T')[0]; // Extract date part from ISO datetime
-    if (dailySalesMap[date]) {
-      dailySalesMap[date] += tx.totalAmount;
-    } else {
-      dailySalesMap[date] = tx.totalAmount;
-    }
-  });
-
-  const dailySalesData = Object.entries(dailySalesMap)
-    .map(([date, total]) => ({ date, total }))
-    .sort((a, b) => a.date.localeCompare(b.date));
-
-  return {
-    ...rest,
-    data: dailySalesData,
-  };
-};
+// (Deprecated hooks removed)

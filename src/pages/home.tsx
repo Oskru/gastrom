@@ -1,103 +1,103 @@
-// src/pages/HomePage.tsx
-import React from 'react';
+/**
+ * Home Page (Dashboard)
+ *
+ * Customizable Dashboard with Drag & Drop
+ * =======================================
+ * This dashboard allows users to customize their layout by:
+ * - Adding/removing tiles from a toolbar
+ * - Dragging and dropping tiles to reorder them
+ * - Persisting configuration in localStorage
+ *
+ * Features:
+ * - Toggle customize mode to show/hide editing controls
+ * - Add tiles from a toolbar
+ * - Remove individual tiles
+ * - Drag & drop to reorder tiles
+ * - Reset to default layout
+ * - Automatic save to localStorage
+ */
+import React, { useState } from 'react';
 import {
   Box,
   Button,
-  CircularProgress,
   Grid,
-  Paper,
   Snackbar,
-  Typography,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
+  ToggleButton,
+  ToggleButtonGroup,
   Alert,
-  useTheme,
-  useMediaQuery,
 } from '@mui/material';
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
-import {
-  AttachMoney as AttachMoneyIcon,
-  Inventory as InventoryIcon,
-  ShoppingCart as ShoppingCartIcon,
-  CreditCard as CreditCardIcon,
+  Edit as EditIcon,
+  Visibility as VisibilityIcon,
+  RestartAlt as RestartAltIcon,
 } from '@mui/icons-material';
-import MainContainer from '../components/main-container';
-import { useLowStockIngredients } from '../hooks/use-inventory';
 import {
-  useRecentTransactions,
-  useDailySalesData,
-  useSalesByPaymentMethod,
-} from '../hooks/use-transactions';
-import { useStatistics } from '../hooks/use-statistics';
-
-const COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#8884D8',
-  '#82CA9D',
-];
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import MainContainer from '../components/main-container';
+import { useDashboardConfig } from '../hooks/use-dashboard-config';
+import { TileToolbar } from '../components/dashboard/TileToolbar';
+import { SortableTile } from '../components/dashboard/SortableTile';
+import { DashboardTileType } from '../types/dashboard';
 
 const HomePage: React.FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [error, setError] = React.useState<string>('');
-  const [snackbarMsg, setSnackbarMsg] = React.useState<string>('');
+  const [isCustomizeMode, setIsCustomizeMode] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
 
-  // Fetch data using our custom hooks
-  const {
-    data: lowStockItems = [],
-    isLoading: loadingInventory,
-    refetch: refetchInventory,
-  } = useLowStockIngredients();
+  const { config, addTile, removeTile, updateTileOrder, resetToDefault } =
+    useDashboardConfig();
 
-  const {
-    data: recentTransactions = [],
-    isLoading: loadingRecentTransactions,
-    refetch: refetchRecentTransactions,
-  } = useRecentTransactions(5);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  // Fetch statistics from the API
-  const { data: dailyStats, isLoading: loadingDailyStats } =
-    useStatistics('DAILY');
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const { data: overallStats, isLoading: loadingOverallStats } =
-    useStatistics('OVERALL');
+    if (over && active.id !== over.id) {
+      const oldIndex = config.tiles.findIndex(tile => tile.id === active.id);
+      const newIndex = config.tiles.findIndex(tile => tile.id === over.id);
 
-  const { data: dailySalesData = [], isLoading: loadingDailySales } =
-    useDailySalesData();
-
-  const {
-    data: salesByPaymentMethod = [],
-    isLoading: loadingPaymentMethodData,
-  } = useSalesByPaymentMethod();
-
-  // Use statistics data for metrics
-  const totalSalesToday = dailyStats?.totalRevenue || 0;
-  const totalTransactionsToday = dailyStats?.transactionCount || 0;
-  const averageOrderValue = overallStats?.averageOrderValue || 0;
-
-  // Handle refresh of all data
-  const refreshDashboard = () => {
-    refetchInventory();
-    refetchRecentTransactions();
-    setSnackbarMsg('Dashboard data refreshed successfully');
+      const newTiles = arrayMove(config.tiles, oldIndex, newIndex);
+      updateTileOrder(newTiles);
+    }
   };
+
+  const handleAddTile = (type: DashboardTileType, width: number) => {
+    addTile(type, width);
+    setSnackbarMsg(`Tile added to dashboard`);
+  };
+
+  const handleRemoveTile = (id: string) => {
+    removeTile(id);
+    setSnackbarMsg('Tile removed from dashboard');
+  };
+
+  const handleResetDashboard = () => {
+    resetToDefault();
+    setSnackbarMsg('Dashboard reset to default layout');
+  };
+
+  const existingTileTypes = config.tiles.map(tile => tile.type);
 
   return (
     <MainContainer title='Dashboard'>
@@ -109,314 +109,101 @@ const HomePage: React.FC = () => {
           mx: 'auto',
         }}
       >
-        {/* Key Metrics Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          {/* Today's Sales */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Box display='flex' alignItems='center' mb={2}>
-                  <AttachMoneyIcon color='primary' sx={{ mr: 1 }} />
-                  <Typography variant='h6' component='div'>
-                    Today's Sales
-                  </Typography>
-                </Box>
-                {loadingDailyStats ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <>
-                    <Typography variant='h4' color='primary' gutterBottom>
-                      ${totalSalesToday.toFixed(2)}
-                    </Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                      Total revenue today
-                    </Typography>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Orders Count */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Box display='flex' alignItems='center' mb={2}>
-                  <ShoppingCartIcon color='primary' sx={{ mr: 1 }} />
-                  <Typography variant='h6' component='div'>
-                    Today's Orders
-                  </Typography>
-                </Box>
-                {loadingDailyStats ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <>
-                    <Typography variant='h4' color='primary' gutterBottom>
-                      {totalTransactionsToday}
-                    </Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                      Total orders today
-                    </Typography>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Average Order Value */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Box display='flex' alignItems='center' mb={2}>
-                  <CreditCardIcon color='primary' sx={{ mr: 1 }} />
-                  <Typography variant='h6' component='div'>
-                    Avg Order Value
-                  </Typography>
-                </Box>
-                {loadingOverallStats ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <>
-                    <Typography variant='h4' color='primary' gutterBottom>
-                      ${averageOrderValue.toFixed(2)}
-                    </Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                      Overall average
-                    </Typography>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Low Stock Alert */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Box display='flex' alignItems='center' mb={2}>
-                  <InventoryIcon color='primary' sx={{ mr: 1 }} />
-                  <Typography variant='h6' component='div'>
-                    Low Stock Items
-                  </Typography>
-                </Box>
-                {loadingInventory ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <>
-                    <Typography variant='h4' color='primary' gutterBottom>
-                      {lowStockItems.length}
-                    </Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                      Items need attention
-                    </Typography>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        {/* Charts Section */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          {/* Sales Chart */}
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 3, height: '100%' }}>
-              <Typography variant='h6' gutterBottom>
-                Sales Trend (Last 7 Days)
-              </Typography>
-              {loadingDailySales ? (
-                <Box display='flex' justifyContent='center' mt={4}>
-                  <CircularProgress />
-                </Box>
-              ) : dailySalesData.length > 0 ? (
-                <ResponsiveContainer width='100%' height={300}>
-                  <BarChart
-                    data={dailySalesData.slice(-7)}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray='3 3' />
-                    <XAxis dataKey='date' />
-                    <YAxis />
-                    <Tooltip
-                      formatter={value => [
-                        `$${Number(value).toFixed(2)}`,
-                        'Sales',
-                      ]}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey='total'
-                      fill={theme.palette.primary.main}
-                      name='Sales'
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                  <Typography>No sales data available</Typography>
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-
-          {/* Payment Methods */}
-          <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3, height: '100%' }}>
-              <Typography variant='h6' gutterBottom>
-                Payment Methods
-              </Typography>
-              {loadingPaymentMethodData ? (
-                <Box display='flex' justifyContent='center' mt={4}>
-                  <CircularProgress />
-                </Box>
-              ) : salesByPaymentMethod.length > 0 ? (
-                <ResponsiveContainer width='100%' height={300}>
-                  <PieChart>
-                    <Pie
-                      data={salesByPaymentMethod}
-                      dataKey='amount'
-                      nameKey='method'
-                      cx='50%'
-                      cy='50%'
-                      outerRadius={isMobile ? 80 : 100}
-                      label={entry => entry.method}
-                    >
-                      {salesByPaymentMethod.map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={value => [
-                        `$${Number(value).toFixed(2)}`,
-                        'Amount',
-                      ]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                  <Typography>No payment data available</Typography>
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
-
-        {/* Low Stock Alert Section */}
-        {lowStockItems.length > 0 && (
-          <Box sx={{ mb: 4 }}>
-            <Alert
-              severity='warning'
-              sx={{ mb: 2 }}
-              action={
-                <Button color='inherit' size='small' href='/inventory'>
-                  View Inventory
-                </Button>
+        {/* Control Bar */}
+        <Box
+          sx={{
+            mb: 3,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2,
+          }}
+        >
+          <ToggleButtonGroup
+            value={isCustomizeMode ? 'edit' : 'view'}
+            exclusive
+            onChange={(_, value) => {
+              if (value !== null) {
+                setIsCustomizeMode(value === 'edit');
               }
-            >
-              {lowStockItems.length} items are running low on stock and need
-              attention
-            </Alert>
-            <Grid container spacing={2}>
-              {lowStockItems.slice(0, 3).map(item => (
-                <Grid item xs={12} sm={6} md={4} key={item.id}>
-                  <Paper sx={{ p: 2 }}>
-                    <Typography variant='subtitle1' fontWeight='bold'>
-                      {item.name}
-                    </Typography>
-                    <Typography
-                      variant='body2'
-                      color='text.secondary'
-                      gutterBottom
-                    >
-                      Unit: {item.unit}
-                    </Typography>
-                    <Box display='flex' justifyContent='space-between' mt={1}>
-                      <Typography variant='body2'>
-                        Current:{' '}
-                        <strong>
-                          {item.stockQuantity} {item.unit}
-                        </strong>
-                      </Typography>
-                      <Typography variant='body2'>
-                        Alert:{' '}
-                        <strong>
-                          {item.alertQuantity} {item.unit}
-                        </strong>
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
+            }}
+            aria-label='dashboard mode'
+            size='small'
+          >
+            <ToggleButton value='view' aria-label='view mode'>
+              <VisibilityIcon sx={{ mr: 1 }} fontSize='small' />
+              View
+            </ToggleButton>
+            <ToggleButton value='edit' aria-label='edit mode'>
+              <EditIcon sx={{ mr: 1 }} fontSize='small' />
+              Customize
+            </ToggleButton>
+          </ToggleButtonGroup>
 
-        {/* Recent Transactions Section */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant='h5' gutterBottom>
-            Recent Transactions
-          </Typography>
-          {loadingRecentTransactions ? (
-            <CircularProgress />
-          ) : recentTransactions.length > 0 ? (
-            <Grid container spacing={2}>
-              {recentTransactions.map(tx => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={tx.id}>
-                  <Paper sx={{ p: 2 }}>
-                    <Typography variant='subtitle1' fontWeight='bold'>
-                      Transaction #{tx.id}
-                    </Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Box display='flex' justifyContent='space-between' mb={1}>
-                      <Typography variant='body2' color='text.secondary'>
-                        Amount:
-                      </Typography>
-                      <Typography variant='body2' fontWeight='bold'>
-                        ${tx.totalAmount.toFixed(2)}
-                      </Typography>
-                    </Box>
-                    <Box display='flex' justifyContent='space-between' mb={1}>
-                      <Typography variant='body2' color='text.secondary'>
-                        Date:
-                      </Typography>
-                      <Typography variant='body2'>
-                        {new Date(tx.dateTime).toLocaleDateString()}
-                      </Typography>
-                    </Box>
-                    <Box display='flex' justifyContent='space-between'>
-                      <Typography variant='body2' color='text.secondary'>
-                        Payment:
-                      </Typography>
-                      <Chip
-                        label={tx.paymentMethod}
-                        size='small'
-                        color={
-                          tx.paymentMethod === 'CARD' ? 'primary' : 'default'
-                        }
-                        variant='outlined'
-                      />
-                    </Box>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-          ) : (
-            <Typography variant='body1'>
-              No recent transactions found.
-            </Typography>
+          {isCustomizeMode && (
+            <Button
+              variant='outlined'
+              color='warning'
+              startIcon={<RestartAltIcon />}
+              onClick={handleResetDashboard}
+              size='small'
+            >
+              Reset to Default
+            </Button>
           )}
         </Box>
 
-        {/* Refresh Data Button */}
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Button variant='contained' onClick={refreshDashboard}>
-            Refresh Dashboard
-          </Button>
-        </Box>
+        {/* Tile Toolbar (shown in customize mode) */}
+        {isCustomizeMode && (
+          <TileToolbar
+            onAddTile={handleAddTile}
+            existingTileTypes={existingTileTypes}
+          />
+        )}
+
+        {/* Customize Mode Info */}
+        {isCustomizeMode && (
+          <Alert severity='info' sx={{ mb: 3 }}>
+            <strong>Customize Mode Active:</strong> Add tiles from the toolbar
+            above, drag tiles to reorder, or click the X to remove them. Your
+            changes are automatically saved.
+          </Alert>
+        )}
+
+        {/* Dashboard Tiles with Drag & Drop */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={config.tiles.map(tile => tile.id)}
+            strategy={rectSortingStrategy}
+          >
+            <Grid container spacing={3}>
+              {config.tiles.map(tile => (
+                <Grid item xs={12} sm={6} md={tile.width} key={tile.id}>
+                  <SortableTile
+                    tile={tile}
+                    isCustomizeMode={isCustomizeMode}
+                    onRemove={handleRemoveTile}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </SortableContext>
+        </DndContext>
+
+        {/* Empty State */}
+        {config.tiles.length === 0 && (
+          <Alert severity='warning' sx={{ mt: 3 }}>
+            No tiles on dashboard.{' '}
+            {isCustomizeMode
+              ? 'Add some from the toolbar above!'
+              : 'Enable customize mode to add tiles.'}
+          </Alert>
+        )}
 
         {/* Snackbar Notifications */}
         <Snackbar
@@ -426,14 +213,6 @@ const HomePage: React.FC = () => {
           message={snackbarMsg}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         />
-        {error && (
-          <Snackbar
-            open={!!error}
-            autoHideDuration={3000}
-            onClose={() => setError('')}
-            message={error}
-          />
-        )}
       </Box>
     </MainContainer>
   );

@@ -4,6 +4,7 @@ import Home from '../pages/home.tsx';
 import SignIn from '../pages/sign-in.tsx';
 import Inventory from '../pages/inventory.tsx';
 import EmployeesPage from '../pages/employee.tsx';
+import UsersPage from '../pages/users.tsx';
 import About from '../pages/about.tsx';
 import MyAccount from '../pages/my-account.tsx';
 import SalesReport from '../pages/sales-report.tsx';
@@ -46,6 +47,10 @@ const routesForAuthenticatedOnly = [
       {
         path: '/employees',
         element: <EmployeesPage />,
+      },
+      {
+        path: '/users',
+        element: <UsersPage />,
       },
       {
         path: '/sales-reports',

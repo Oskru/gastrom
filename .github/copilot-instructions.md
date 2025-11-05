@@ -100,8 +100,7 @@ npm run preview      # Preview production build
 
 ## Common Gotchas
 
-- The `App.tsx` component is minimal - main routing happens in
-  `src/routing/routes.tsx`
+- Main routing happens in `src/routing/routes.tsx`
 - MUI v6 uses CSS variables - check theme customizations in
   `src/styles/customizations/`
 - Playwright tests require the dev server running on port 5173

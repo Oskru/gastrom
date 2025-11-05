@@ -10,7 +10,8 @@ import AnalyticsRoundedIcon from '@mui/icons-material/AnalyticsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Inventory, PeopleRounded } from '@mui/icons-material';
+import { Inventory, PeopleRounded, ManageAccounts } from '@mui/icons-material';
+import { useUser } from '../../hooks/use-user';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon />, url: '/' },
@@ -23,6 +24,12 @@ const mainListItems = [
     text: 'Employees',
     icon: <PeopleRounded />,
     url: '/employees',
+  },
+  {
+    text: 'Users',
+    icon: <ManageAccounts />,
+    url: '/users',
+    requiresAdmin: true,
   },
   {
     text: 'Sales reports',
@@ -43,6 +50,15 @@ interface MenuContentProps {
 export default function MenuContent({ isCollapsed = false }: MenuContentProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useUser();
+
+  // Filter menu items based on user role
+  const filteredMainItems = mainListItems.filter(item => {
+    if (item.requiresAdmin) {
+      return user?.userRole === 'ADMIN';
+    }
+    return true;
+  });
 
   const renderListItem = (item: (typeof mainListItems)[0]) => {
     const isSelected = location.pathname === item.url;
@@ -107,7 +123,7 @@ export default function MenuContent({ isCollapsed = false }: MenuContentProps) {
 
   return (
     <Stack sx={{ flexGrow: 999, p: 1, justifyContent: 'space-between' }}>
-      <List dense>{mainListItems.map(renderListItem)}</List>
+      <List dense>{filteredMainItems.map(renderListItem)}</List>
       <List dense>{secondaryListItems.map(renderListItem)}</List>
     </Stack>
   );
