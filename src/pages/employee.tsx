@@ -1,5 +1,5 @@
 // src/pages/EmployeesPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -20,12 +20,15 @@ import {
   IconButton,
   Tooltip,
   Typography,
+  Alert,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
   AttachMoney as MoneyIcon,
   AccessTime as TimeIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
+import { useSearchParams } from 'react-router-dom';
 import MainContainer from '../components/main-container';
 import { EmployeeDto, CreateEmployeeCommand } from '../schemas/employee';
 import {
@@ -45,6 +48,7 @@ const defaultFormState: CreateEmployeeCommand = {
 };
 
 const EmployeesPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openHoursDialog, setOpenHoursDialog] = useState<boolean>(false);
@@ -62,6 +66,32 @@ const EmployeesPage: React.FC = () => {
   const updateHours = useUpdateEmployeeHours();
   const generateSalary = useGenerateEmployeeSalary();
   const deleteEmployee = useDeleteEmployee();
+
+  // Get employeeId from URL params
+  const employeeIdParam = searchParams.get('employeeId');
+  const filteredEmployeeId = employeeIdParam
+    ? parseInt(employeeIdParam, 10)
+    : null;
+
+  // Filter and sort employees
+  const displayedEmployees = useMemo(() => {
+    let result = [...employees];
+
+    // Filter by employeeId if param exists
+    if (filteredEmployeeId !== null && !isNaN(filteredEmployeeId)) {
+      result = result.filter(emp => emp.id === filteredEmployeeId);
+    }
+
+    // Sort by id (least to most)
+    result.sort((a, b) => a.id - b.id);
+
+    return result;
+  }, [employees, filteredEmployeeId]);
+
+  // Clear filter
+  const handleClearFilter = () => {
+    setSearchParams({});
+  };
 
   // Open dialog for creating a new employee
   const handleOpenDialogForCreate = () => {
@@ -151,14 +181,31 @@ const EmployeesPage: React.FC = () => {
 
   return (
     <MainContainer title='Employee Management'>
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={handleOpenDialogForCreate}
-        sx={{ mb: 2 }}
-      >
-        Add Employee
-      </Button>
+      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={handleOpenDialogForCreate}
+        >
+          Add Employee
+        </Button>
+        {filteredEmployeeId !== null && !isNaN(filteredEmployeeId) && (
+          <Button
+            variant='outlined'
+            color='secondary'
+            startIcon={<ClearIcon />}
+            onClick={handleClearFilter}
+          >
+            Clear Filter
+          </Button>
+        )}
+      </Box>
+
+      {filteredEmployeeId !== null && !isNaN(filteredEmployeeId) && (
+        <Alert severity='info' sx={{ mb: 2 }}>
+          Showing employee with ID: {filteredEmployeeId}
+        </Alert>
+      )}
 
       {loading ? (
         <Box display='flex' justifyContent='center' mt={4}>
@@ -179,7 +226,7 @@ const EmployeesPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {employees.map(emp => (
+              {displayedEmployees.map(emp => (
                 <TableRow key={emp.id}>
                   <TableCell>{emp.id}</TableCell>
                   <TableCell>
@@ -218,10 +265,12 @@ const EmployeesPage: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {employees.length === 0 && (
+              {displayedEmployees.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align='center'>
-                    No employees found.
+                    {filteredEmployeeId !== null && !isNaN(filteredEmployeeId)
+                      ? `No employee found with ID: ${filteredEmployeeId}`
+                      : 'No employees found.'}
                   </TableCell>
                 </TableRow>
               )}

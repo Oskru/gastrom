@@ -185,6 +185,7 @@ const HomePage: React.FC = () => {
           <TileToolbar
             onAddTile={handleAddTile}
             existingTileTypes={existingTileTypes}
+            timeframe={timeframe}
           />
         )}
 

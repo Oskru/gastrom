@@ -37,8 +37,10 @@ import {
   useStatistics,
   useExpandedStatistics,
 } from '../../hooks/use-statistics';
+import { useEmployees } from '../../hooks/use-employees';
 import { DashboardTileType } from '../../types/dashboard';
 import { useTimeframe } from '../../context/timeframe-context';
+import { Link as RouterLink } from 'react-router-dom';
 
 const COLORS = [
   '#0088FE',
@@ -207,6 +209,10 @@ export const PaymentMethodsTile: React.FC = () => {
     return items;
   }, [overallStats]);
 
+  const renderCustomLabel = (entry: { method?: string }) => {
+    return entry.method || '';
+  };
+
   return (
     <TileWrapper>
       <Paper sx={{ p: 3, height: '100%' }}>
@@ -224,7 +230,8 @@ export const PaymentMethodsTile: React.FC = () => {
                   cx='50%'
                   cy='50%'
                   outerRadius={isMobile ? 80 : 100}
-                  label={entry => entry.method}
+                  label={renderCustomLabel}
+                  labelLine={false}
                 >
                   {paymentMethodData.map((_, index) => (
                     <Cell
@@ -234,9 +241,9 @@ export const PaymentMethodsTile: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={value => [
+                  formatter={(value, name) => [
                     `$${Number(value).toFixed(2)}`,
-                    'Amount',
+                    name,
                   ]}
                 />
               </PieChart>
@@ -326,6 +333,26 @@ export const LowStockItemsTile: React.FC = () => {
 // Recent Transactions Tile
 export const RecentTransactionsTile: React.FC = () => {
   const { data: recentTransactions = [], isLoading } = useRecentTransactions(4);
+  const { data: employees = [] } = useEmployees();
+
+  // Create a map of employee id to employee data for quick lookup
+  const employeeMap = React.useMemo(() => {
+    const map = new Map();
+    employees.forEach(emp => {
+      map.set(emp.id, emp);
+    });
+    return map;
+  }, [employees]);
+
+  const formatTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+  };
 
   return (
     <TileWrapper>
@@ -337,45 +364,85 @@ export const RecentTransactionsTile: React.FC = () => {
           <CircularProgress />
         ) : recentTransactions.length > 0 ? (
           <Grid container spacing={2}>
-            {recentTransactions.map(tx => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={tx.id}>
-                <Paper sx={{ p: 2 }}>
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Transaction #{tx.id}
-                  </Typography>
-                  <Divider sx={{ my: 1 }} />
-                  <Box display='flex' justifyContent='space-between' mb={1}>
-                    <Typography variant='body2' color='text.secondary'>
-                      Amount:
+            {recentTransactions.map(tx => {
+              const employee = employeeMap.get(tx.employeeId);
+              return (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={tx.id}>
+                  <Paper sx={{ p: 2 }}>
+                    <Typography variant='subtitle1' fontWeight='bold'>
+                      Transaction #{tx.id}
                     </Typography>
-                    <Typography variant='body2' fontWeight='bold'>
-                      ${tx.totalAmount.toFixed(2)}
-                    </Typography>
-                  </Box>
-                  <Box display='flex' justifyContent='space-between' mb={1}>
-                    <Typography variant='body2' color='text.secondary'>
-                      Date:
-                    </Typography>
-                    <Typography variant='body2'>
-                      {new Date(tx.dateTime).toLocaleDateString()}
-                    </Typography>
-                  </Box>
-                  <Box display='flex' justifyContent='space-between'>
-                    <Typography variant='body2' color='text.secondary'>
-                      Payment:
-                    </Typography>
-                    <Chip
-                      label={tx.paymentMethod}
-                      size='small'
-                      color={
-                        tx.paymentMethod === 'CARD' ? 'primary' : 'default'
-                      }
-                      variant='outlined'
-                    />
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
+                    <Divider sx={{ my: 1 }} />
+                    <Box display='flex' justifyContent='space-between' mb={1}>
+                      <Typography variant='body2' color='text.secondary'>
+                        Amount:
+                      </Typography>
+                      <Typography variant='body2' fontWeight='bold'>
+                        ${tx.totalAmount.toFixed(2)}
+                      </Typography>
+                    </Box>
+                    <Box display='flex' justifyContent='space-between' mb={1}>
+                      <Typography variant='body2' color='text.secondary'>
+                        Date:
+                      </Typography>
+                      <Typography variant='body2'>
+                        {new Date(tx.dateTime).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                    <Box display='flex' justifyContent='space-between' mb={1}>
+                      <Typography variant='body2' color='text.secondary'>
+                        Time:
+                      </Typography>
+                      <Typography variant='body2'>
+                        {formatTime(tx.dateTime)}
+                      </Typography>
+                    </Box>
+                    <Box mb={1}>
+                      <Typography
+                        variant='body2'
+                        color='text.secondary'
+                        gutterBottom
+                      >
+                        Employee:
+                      </Typography>
+                      {employee ? (
+                        <Typography
+                          variant='body2'
+                          component={RouterLink}
+                          to={`/employees?employeeId=${tx.employeeId}`}
+                          sx={{
+                            textDecoration: 'none',
+                            color: 'primary.main',
+                            wordBreak: 'break-word',
+                            display: 'block',
+                            '&:hover': {
+                              textDecoration: 'underline',
+                            },
+                          }}
+                        >
+                          {employee.firstName} {employee.lastName}
+                        </Typography>
+                      ) : (
+                        <Typography variant='body2'>Unknown</Typography>
+                      )}
+                    </Box>
+                    <Box display='flex' justifyContent='space-between'>
+                      <Typography variant='body2' color='text.secondary'>
+                        Payment:
+                      </Typography>
+                      <Chip
+                        label={tx.paymentMethod}
+                        size='small'
+                        color={
+                          tx.paymentMethod === 'CARD' ? 'primary' : 'default'
+                        }
+                        variant='outlined'
+                      />
+                    </Box>
+                  </Paper>
+                </Grid>
+              );
+            })}
           </Grid>
         ) : (
           <Typography variant='body1'>No recent transactions found.</Typography>
@@ -464,7 +531,7 @@ export const TotalExpenseTile: React.FC = () => {
       <Card sx={{ height: '100%' }}>
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <MoneyOffIcon color='error' sx={{ mr: 1 }} />
+            <MoneyOffIcon color='primary' sx={{ mr: 1 }} />
             <Typography variant='h6' component='div'>
               Total Expenses
             </Typography>
@@ -473,7 +540,7 @@ export const TotalExpenseTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='error' gutterBottom>
+              <Typography variant='h4' color='primary' gutterBottom>
                 ${totalExpense.toFixed(2)}
               </Typography>
               <Typography variant='body2' color='text.secondary'>
@@ -782,6 +849,16 @@ export const TopProductsRevenueTile: React.FC = () => {
       .slice(0, 10);
   }, [expandedStats]);
 
+  const renderCustomLabel = (entry: { name?: string }) => {
+    if (!entry.name) return '';
+    // Remove "Product " prefix
+    const cleanName = entry.name.replace(/^Product\s+/, '');
+    // Truncate if too long (max 12 characters)
+    return cleanName.length > 12
+      ? `${cleanName.substring(0, 12)}...`
+      : cleanName;
+  };
+
   return (
     <TileWrapper>
       <Paper sx={{ p: 3, height: '100%' }}>
@@ -802,7 +879,8 @@ export const TopProductsRevenueTile: React.FC = () => {
                 cx='50%'
                 cy='50%'
                 outerRadius={isMobile ? 80 : 100}
-                label={entry => entry.name}
+                label={renderCustomLabel}
+                labelLine={false}
               >
                 {revenueData.map((_, index) => (
                   <Cell
@@ -812,7 +890,10 @@ export const TopProductsRevenueTile: React.FC = () => {
                 ))}
               </Pie>
               <Tooltip
-                formatter={value => [`$${Number(value).toFixed(2)}`, 'Revenue']}
+                formatter={(value, name) => [
+                  `$${Number(value).toFixed(2)}`,
+                  String(name).replace(/^Product\s+/, ''),
+                ]}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -845,6 +926,16 @@ export const TopProductsUnitsTile: React.FC = () => {
       .slice(0, 10);
   }, [expandedStats]);
 
+  const renderCustomLabel = (entry: { name?: string }) => {
+    if (!entry.name) return '';
+    // Remove "Product " prefix
+    const cleanName = entry.name.replace(/^Product\s+/, '');
+    // Truncate if too long (max 12 characters)
+    return cleanName.length > 12
+      ? `${cleanName.substring(0, 12)}...`
+      : cleanName;
+  };
+
   return (
     <TileWrapper>
       <Paper sx={{ p: 3, height: '100%' }}>
@@ -865,7 +956,8 @@ export const TopProductsUnitsTile: React.FC = () => {
                 cx='50%'
                 cy='50%'
                 outerRadius={isMobile ? 80 : 100}
-                label={entry => entry.name}
+                label={renderCustomLabel}
+                labelLine={false}
               >
                 {unitsData.map((_, index) => (
                   <Cell
@@ -874,7 +966,12 @@ export const TopProductsUnitsTile: React.FC = () => {
                   />
                 ))}
               </Pie>
-              <Tooltip formatter={value => [value, 'Units Sold']} />
+              <Tooltip
+                formatter={(value, name) => [
+                  `${value} units`,
+                  String(name).replace(/^Product\s+/, ''),
+                ]}
+              />
             </PieChart>
           </ResponsiveContainer>
         ) : (
