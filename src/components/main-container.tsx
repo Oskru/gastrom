@@ -35,16 +35,47 @@ export default function MainContainer({
           maxWidth: '100%',
         }}
       >
-        <Typography
-          variant={isMobile ? 'h4' : 'h3'}
+        <Box
           sx={{
             mb: { xs: 3, sm: 4, md: 5 },
-            fontWeight: 'bold',
-            color: theme => theme.palette.text.primary,
+            position: 'relative',
+            display: 'inline-block',
           }}
         >
-          {title}
-        </Typography>
+          <Typography
+            variant={isMobile ? 'h4' : 'h3'}
+            sx={{
+              fontWeight: 800,
+              background: theme =>
+                theme.palette.mode === 'dark'
+                  ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              textFillColor: 'transparent',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+              pb: 1,
+              borderBottom: theme =>
+                `3px solid ${theme.palette.mode === 'dark' ? '#667eea' : '#764ba2'}`,
+              display: 'inline-block',
+              animation: 'fadeInDown 0.6s ease-out',
+              '@keyframes fadeInDown': {
+                '0%': {
+                  opacity: 0,
+                  transform: 'translateY(-20px)',
+                },
+                '100%': {
+                  opacity: 1,
+                  transform: 'translateY(0)',
+                },
+              },
+            }}
+          >
+            {title}
+          </Typography>
+        </Box>
         <Box
           sx={{
             maxWidth: '1400px',
