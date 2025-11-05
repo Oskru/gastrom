@@ -51,13 +51,15 @@ export const transactionKeys = {
 export const useTransactionsPaged = (
   page: number,
   size: number,
+  sort?: string,
   options: Record<string, unknown> = {}
 ) => {
   return useQuery({
     queryKey: transactionKeys.page(page, size),
     queryFn: async () => {
+      const sortParam = sort ? `&sort=${sort}` : '';
       const response = await apiInstance.get<PageTransactionDto>(
-        `/transactions?page=${page}&size=${size}`
+        `/transactions?page=${page}&size=${size}${sortParam}`
       );
       return normalizeTransactionPage(response.data);
     },
@@ -69,11 +71,14 @@ export const useTransactionsPaged = (
 
 // Fetch only recent transactions (single page sized by limit) – primary allowed usage.
 export const useRecentTransactions = (limit = 5, options = {}) => {
-  const { data: pageData, ...rest } = useTransactionsPaged(0, limit, options);
-  const sorted = [...(pageData?.content || [])].sort((a, b) =>
-    a.dateTime < b.dateTime ? 1 : -1
+  const { data: pageData, ...rest } = useTransactionsPaged(
+    0,
+    limit,
+    'id,desc',
+    options
   );
-  return { ...rest, data: sorted.slice(0, limit) };
+  // Server already sorts by id descending, so we just return the content
+  return { ...rest, data: pageData?.content || [] };
 };
 
 // Removed analytics hooks (useTodayTransactions, useDailySalesData, useSalesByPaymentMethod, etc.)
