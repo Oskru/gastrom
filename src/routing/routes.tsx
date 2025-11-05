@@ -9,6 +9,7 @@ import About from '../pages/about.tsx';
 import MyAccount from '../pages/my-account.tsx';
 import Feedback from '../pages/feedback.tsx';
 import FixedCostsPage from '../pages/fixed-costs.tsx';
+import SalesReportsPage from '../pages/sales-reports.tsx';
 
 // Public routes accessible to all users
 const routesForPublic = [
@@ -55,6 +56,10 @@ const routesForAuthenticatedOnly = [
       {
         path: '/fixed-costs',
         element: <FixedCostsPage />,
+      },
+      {
+        path: '/sales-reports',
+        element: <SalesReportsPage />,
       },
       {
         path: '/about',

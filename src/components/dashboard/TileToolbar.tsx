@@ -123,14 +123,14 @@ export const TileToolbar: React.FC<TileToolbarProps> = ({
       setPlacement('right');
     }
 
-    // Add small delay to prevent laggy behavior when moving between tiles
+    // Add delay to prevent tooltips from appearing too quickly
     hoverTimeoutRef.current = setTimeout(() => {
       if (isHoveringRef.current) {
         setAnchorEl(element);
         setPreviewTileType(tileType);
       }
       hoverTimeoutRef.current = null;
-    }, 100);
+    }, 500);
   };
 
   const handleMouseLeave = () => {

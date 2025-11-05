@@ -11,7 +11,7 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ColorModeSelect from '../styles/ColorModeSelect.tsx';
 import { useAuth } from '../hooks/use-auth.ts';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Alert, Collapse } from '@mui/material';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -70,6 +70,8 @@ export default function SignIn() {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
+  const [loginError, setLoginError] = React.useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = React.useState('');
   const { login } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -77,10 +79,16 @@ export default function SignIn() {
 
     if (validateInputs()) {
       setIsLoggingIn(true);
+      setLoginError(false);
+      setLoginErrorMessage('');
+
       await login(email, password)
         .then(({ error }) => {
           if (error) {
-            alert('Invalid credentials');
+            setLoginError(true);
+            setLoginErrorMessage(
+              'Invalid credentials. Please check your email and password.'
+            );
           }
         })
         .finally(() => {
@@ -158,6 +166,18 @@ export default function SignIn() {
               gap: 2,
             }}
           >
+            <Collapse in={loginError}>
+              <Alert
+                severity='error'
+                onClose={() => setLoginError(false)}
+                sx={{
+                  mb: 1,
+                  borderRadius: 2,
+                }}
+              >
+                {loginErrorMessage}
+              </Alert>
+            </Collapse>
             <FormControl>
               <FormLabel htmlFor='email'>Email</FormLabel>
               <TextField

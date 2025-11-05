@@ -431,7 +431,12 @@ export const LowStockItemsTile: React.FC = () => {
           severity='warning'
           sx={{ mb: 2 }}
           action={
-            <Button color='inherit' size='small' href='/inventory'>
+            <Button
+              color='inherit'
+              size='small'
+              component={RouterLink}
+              to='/inventory'
+            >
               View Inventory
             </Button>
           }

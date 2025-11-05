@@ -50,7 +50,81 @@ export const useCreateUser = () => {
       const response = await apiInstance.post<UserDto>('/users', newUser);
       return userDtoSchema.parse(response.data);
     },
-    onSuccess: () => {
+    onMutate: async (newUser: CreateUserCommand) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: userKeys.lists() });
+
+      // Snapshot the previous value
+      const previousUsers = queryClient.getQueryData<UserDto[]>(
+        userKeys.lists()
+      );
+
+      // Optimistically update to the new value
+      if (previousUsers) {
+        const optimisticUser: UserDto = {
+          id: Date.now(), // Temporary ID
+          ...newUser,
+          enabled: true,
+          accountNonExpired: true,
+          accountNonLocked: true,
+          credentialsNonExpired: true,
+          authorities: [],
+        };
+        queryClient.setQueryData<UserDto[]>(userKeys.lists(), [
+          ...previousUsers,
+          optimisticUser,
+        ]);
+      }
+
+      return { previousUsers };
+    },
+    onError: (_err, _newUser, context) => {
+      // Rollback on error
+      if (context?.previousUsers) {
+        queryClient.setQueryData(userKeys.lists(), context.previousUsers);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+    },
+  });
+};
+
+// Delete a user
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await apiInstance.delete(`/users/${id}`);
+      return id;
+    },
+    onMutate: async (id: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: userKeys.lists() });
+
+      // Snapshot the previous value
+      const previousUsers = queryClient.getQueryData<UserDto[]>(
+        userKeys.lists()
+      );
+
+      // Optimistically update to remove the user
+      if (previousUsers) {
+        queryClient.setQueryData<UserDto[]>(
+          userKeys.lists(),
+          previousUsers.filter(user => user.id !== id)
+        );
+      }
+
+      return { previousUsers };
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousUsers) {
+        queryClient.setQueryData(userKeys.lists(), context.previousUsers);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
   });

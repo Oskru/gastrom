@@ -32,7 +32,41 @@ export const useCreateFixedCost = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
+    onMutate: async (newFixedCost: CreateFixedCost) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: fixedCostKeys.lists() });
+
+      // Snapshot the previous value
+      const previousFixedCosts = queryClient.getQueryData<FixedCost[]>(
+        fixedCostKeys.lists()
+      );
+
+      // Optimistically update to the new value
+      if (previousFixedCosts) {
+        const optimisticFixedCost: FixedCost = {
+          id: Date.now(), // Temporary ID
+          ...newFixedCost,
+          costType: 'BILLING', // Default type
+          createdAt: new Date().toISOString(),
+        };
+        queryClient.setQueryData<FixedCost[]>(fixedCostKeys.lists(), [
+          ...previousFixedCosts,
+          optimisticFixedCost,
+        ]);
+      }
+
+      return { previousFixedCosts };
+    },
+    onError: (_err, _newFixedCost, context) => {
+      // Rollback on error
+      if (context?.previousFixedCosts) {
+        queryClient.setQueryData(
+          fixedCostKeys.lists(),
+          context.previousFixedCosts
+        );
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: fixedCostKeys.lists() });
     },
   });
@@ -45,8 +79,37 @@ export const useDeleteFixedCost = () => {
   return useMutation({
     mutationFn: async (id: number) => {
       await apiInstance.delete(`/fixed-costs/${id}`);
+      return id;
     },
-    onSuccess: () => {
+    onMutate: async (id: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: fixedCostKeys.lists() });
+
+      // Snapshot the previous value
+      const previousFixedCosts = queryClient.getQueryData<FixedCost[]>(
+        fixedCostKeys.lists()
+      );
+
+      // Optimistically update to remove the fixed cost
+      if (previousFixedCosts) {
+        queryClient.setQueryData<FixedCost[]>(
+          fixedCostKeys.lists(),
+          previousFixedCosts.filter(cost => cost.id !== id)
+        );
+      }
+
+      return { previousFixedCosts };
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousFixedCosts) {
+        queryClient.setQueryData(
+          fixedCostKeys.lists(),
+          context.previousFixedCosts
+        );
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: fixedCostKeys.lists() });
     },
   });

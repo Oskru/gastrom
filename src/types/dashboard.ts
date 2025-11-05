@@ -193,7 +193,7 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
     { id: '2', type: 'total-orders', width: 3 },
     { id: '3', type: 'avg-order-value', width: 3 },
     { id: '4', type: 'low-stock-alert', width: 3 },
-    { id: '6', type: 'low-stock-items', width: 12 },
     { id: '7', type: 'recent-transactions', width: 12 },
+    { id: '6', type: 'low-stock-items', width: 12 },
   ],
 };

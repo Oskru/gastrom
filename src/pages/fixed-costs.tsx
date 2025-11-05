@@ -85,18 +85,23 @@ const FixedCostsPage: React.FC = () => {
       return;
     }
 
-    try {
-      await createFixedCost.mutateAsync(formState);
-      enqueueSnackbar('Fixed cost created successfully', {
-        variant: 'success',
-      });
-      handleCloseDialog();
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to create fixed cost';
-      setError(errorMsg);
-      enqueueSnackbar(errorMsg, { variant: 'error' });
-    }
+    // Close dialog immediately for optimistic UX
+    handleCloseDialog();
+
+    // Trigger mutation (optimistic update will show it immediately)
+    createFixedCost.mutate(formState, {
+      onSuccess: () => {
+        enqueueSnackbar('Fixed cost created successfully', {
+          variant: 'success',
+        });
+      },
+      onError: err => {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to create fixed cost';
+        setError(errorMsg);
+        enqueueSnackbar(errorMsg, { variant: 'error' });
+      },
+    });
   };
 
   const handleDeleteFixedCost = async (id: number, description: string) => {

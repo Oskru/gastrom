@@ -14,6 +14,7 @@ import {
   PeopleRounded,
   ManageAccounts,
   AttachMoney,
+  Assessment,
 } from '@mui/icons-material';
 import { useUser } from '../../hooks/use-user';
 
@@ -33,6 +34,11 @@ const mainListItems = [
     text: 'Fixed Costs',
     icon: <AttachMoney />,
     url: '/fixed-costs',
+  },
+  {
+    text: 'Sales Reports',
+    icon: <Assessment />,
+    url: '/sales-reports',
   },
   {
     text: 'Users',

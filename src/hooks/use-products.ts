@@ -69,7 +69,39 @@ export const useCreateProduct = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
+    onMutate: async (newProduct: CreateProductCommand) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: productKeys.lists() });
+
+      // Snapshot the previous value
+      const previousProducts = queryClient.getQueryData<ProductDto[]>(
+        productKeys.lists()
+      );
+
+      // Optimistically update to the new value
+      if (previousProducts) {
+        const optimisticProduct: ProductDto = {
+          id: Date.now(), // Temporary ID
+          name: newProduct.name,
+          price: newProduct.price,
+          productComponentIds: [], // Will be populated by backend
+          takeaway: newProduct.takeaway,
+        };
+        queryClient.setQueryData<ProductDto[]>(productKeys.lists(), [
+          ...previousProducts,
+          optimisticProduct,
+        ]);
+      }
+
+      return { previousProducts };
+    },
+    onError: (_err, _newProduct, context) => {
+      // Rollback on error
+      if (context?.previousProducts) {
+        queryClient.setQueryData(productKeys.lists(), context.previousProducts);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.invalidateQueries({ queryKey: productKeys.components() });
     },
@@ -85,7 +117,32 @@ export const useDeleteProduct = () => {
       await apiInstance.delete(`/products/${id}`);
       return id;
     },
-    onSuccess: id => {
+    onMutate: async (id: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: productKeys.lists() });
+
+      // Snapshot the previous value
+      const previousProducts = queryClient.getQueryData<ProductDto[]>(
+        productKeys.lists()
+      );
+
+      // Optimistically update to remove the product
+      if (previousProducts) {
+        queryClient.setQueryData<ProductDto[]>(
+          productKeys.lists(),
+          previousProducts.filter(product => product.id !== id)
+        );
+      }
+
+      return { previousProducts };
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousProducts) {
+        queryClient.setQueryData(productKeys.lists(), context.previousProducts);
+      }
+    },
+    onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: productKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.invalidateQueries({ queryKey: productKeys.components() });

@@ -106,8 +106,32 @@ export const useCreateTransaction = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: transactionKeys.pages() });
+
+      // Snapshot the previous value (for recent transactions)
+      const previousPage = queryClient.getQueryData(transactionKeys.page(0, 4));
+
+      // Note: For transactions, we don't optimistically update because
+      // we need the server to calculate totalAmount and productIdQuantities
+      // We just return the previous state for potential rollback
+
+      return { previousPage };
+    },
+    onError: (_err, _newTransaction, context) => {
+      // Rollback on error
+      if (context?.previousPage) {
+        queryClient.setQueryData(
+          transactionKeys.page(0, 4),
+          context.previousPage
+        );
+      }
+    },
+    onSettled: () => {
+      // Invalidate all transaction queries after mutation
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.pages() });
     },
   });
 };

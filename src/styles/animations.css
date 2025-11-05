@@ -233,3 +233,59 @@
   background: rgba(18, 18, 23, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Notistack Snackbar Styling */
+.SnackbarItem-variantSuccess {
+  background-color: #00C853 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3) !important;
+  border: 1px solid rgba(0, 200, 83, 0.5) !important;
+  border-radius: 12px !important;
+}
+
+.SnackbarItem-variantError {
+  background-color: #f44336 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3) !important;
+  border: 1px solid rgba(244, 67, 54, 0.5) !important;
+  border-radius: 12px !important;
+}
+
+.SnackbarItem-variantWarning {
+  background-color: #F7B733 !important;
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(247, 183, 51, 0.3) !important;
+  border: 1px solid rgba(247, 183, 51, 0.5) !important;
+  border-radius: 12px !important;
+}
+
+.SnackbarItem-variantInfo {
+  background-color: #667eea !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  border: 1px solid rgba(102, 126, 234, 0.5) !important;
+  border-radius: 12px !important;
+}
+
+.SnackbarItem-variantDefault {
+  background-color: #424242 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+}
+
+.SnackbarItem-message {
+  color: inherit !important;
+  font-weight: 600 !important;
+}
+
+.SnackbarContent-root {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}

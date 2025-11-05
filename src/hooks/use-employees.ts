@@ -50,7 +50,40 @@ export const useCreateEmployee = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
+    onMutate: async (newEmployee: CreateEmployeeCommand) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: employeeKeys.lists() });
+
+      // Snapshot the previous value
+      const previousEmployees = queryClient.getQueryData<EmployeeDto[]>(
+        employeeKeys.lists()
+      );
+
+      // Optimistically update to the new value
+      if (previousEmployees) {
+        const optimisticEmployee: EmployeeDto = {
+          id: Date.now(), // Temporary ID
+          ...newEmployee,
+          hoursWorked: 0,
+        };
+        queryClient.setQueryData<EmployeeDto[]>(employeeKeys.lists(), [
+          ...previousEmployees,
+          optimisticEmployee,
+        ]);
+      }
+
+      return { previousEmployees };
+    },
+    onError: (_err, _newEmployee, context) => {
+      // Rollback on error
+      if (context?.previousEmployees) {
+        queryClient.setQueryData(
+          employeeKeys.lists(),
+          context.previousEmployees
+        );
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
     },
   });
@@ -109,7 +142,35 @@ export const useDeleteEmployee = () => {
       await apiInstance.delete(`/employees/${id}`);
       return id;
     },
-    onSuccess: id => {
+    onMutate: async (id: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: employeeKeys.lists() });
+
+      // Snapshot the previous value
+      const previousEmployees = queryClient.getQueryData<EmployeeDto[]>(
+        employeeKeys.lists()
+      );
+
+      // Optimistically update to remove the employee
+      if (previousEmployees) {
+        queryClient.setQueryData<EmployeeDto[]>(
+          employeeKeys.lists(),
+          previousEmployees.filter(employee => employee.id !== id)
+        );
+      }
+
+      return { previousEmployees };
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousEmployees) {
+        queryClient.setQueryData(
+          employeeKeys.lists(),
+          context.previousEmployees
+        );
+      }
+    },
+    onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: employeeKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
     },

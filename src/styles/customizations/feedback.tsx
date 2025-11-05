@@ -59,9 +59,22 @@ export const feedbackCustomizations: Components<Theme> = {
   },
   MuiBackdrop: {
     styleOverrides: {
+      root: ({ ownerState }) => ({
+        // Only apply blur to dialog/modal backdrops, not popovers
+        backdropFilter: ownerState?.invisible ? 'none' : 'blur(8px)',
+        backgroundColor: ownerState?.invisible
+          ? 'transparent'
+          : 'rgba(0, 0, 0, 0.5)',
+      }),
+    },
+  },
+  MuiPopover: {
+    styleOverrides: {
       root: {
-        backdropFilter: 'blur(8px)',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        '& .MuiBackdrop-root': {
+          backdropFilter: 'none !important',
+          backgroundColor: 'transparent !important',
+        },
       },
     },
   },

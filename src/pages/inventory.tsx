@@ -164,15 +164,20 @@ const InventoryPage: React.FC = () => {
     }));
   };
 
-  const handleIngredientSubmit = async (): Promise<void> => {
-    try {
-      await createIngredient.mutateAsync(ingredientFormState);
-      setSnackbarMsg('Ingredient created successfully');
-      handleCloseIngredientDialog();
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Failed to create ingredient');
-    }
+  const handleIngredientSubmit = (): void => {
+    // Close dialog immediately for optimistic UX
+    handleCloseIngredientDialog();
+
+    // Trigger mutation (optimistic update will show it immediately)
+    createIngredient.mutate(ingredientFormState, {
+      onSuccess: () => {
+        setSnackbarMsg('Ingredient created successfully');
+      },
+      onError: err => {
+        const error = err as Error;
+        setError(error.message || 'Failed to create ingredient');
+      },
+    });
   };
 
   const handleRestockSubmit = async (): Promise<void> => {
@@ -224,15 +229,20 @@ const InventoryPage: React.FC = () => {
     }));
   };
 
-  const handleProductSubmit = async (): Promise<void> => {
-    try {
-      await createProduct.mutateAsync(productFormState);
-      setSnackbarMsg('Product created successfully');
-      handleCloseProductDialog();
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Failed to create product');
-    }
+  const handleProductSubmit = (): void => {
+    // Close dialog immediately for optimistic UX
+    handleCloseProductDialog();
+
+    // Trigger mutation (optimistic update will show it immediately)
+    createProduct.mutate(productFormState, {
+      onSuccess: () => {
+        setSnackbarMsg('Product created successfully');
+      },
+      onError: err => {
+        const error = err as Error;
+        setError(error.message || 'Failed to create product');
+      },
+    });
   };
 
   const handleProductDelete = async (id: number): Promise<void> => {

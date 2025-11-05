@@ -24,6 +24,7 @@ import {
   FormControl,
   InputLabel,
   Chip,
+  Typography,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -31,7 +32,7 @@ import {
 } from '@mui/icons-material';
 import MainContainer from '../components/main-container';
 import { CreateUserCommand, UserRole } from '../schemas/user';
-import { useUsers, useCreateUser } from '../hooks/use-users';
+import { useUsers, useCreateUser, useDeleteUser } from '../hooks/use-users';
 
 const defaultFormState: CreateUserCommand = {
   username: '',
@@ -51,6 +52,7 @@ const UsersPage: React.FC = () => {
   // Use React Query hooks
   const { data: users = [], isLoading: loading } = useUsers();
   const createUser = useCreateUser();
+  const deleteUser = useDeleteUser();
 
   // Open dialog for creating a new user
   const handleOpenDialogForCreate = () => {
@@ -82,28 +84,61 @@ const UsersPage: React.FC = () => {
   };
 
   // Submit form to create user
-  const handleSubmit = async () => {
-    try {
-      await createUser.mutateAsync(formState);
-      setSnackbarMsg('User created successfully');
-      handleCloseDialog();
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Failed to create user');
+  const handleSubmit = () => {
+    // Close dialog immediately for optimistic UX
+    handleCloseDialog();
+
+    // Trigger mutation (optimistic update will show it immediately)
+    createUser.mutate(formState, {
+      onSuccess: () => {
+        setSnackbarMsg('User created successfully');
+      },
+      onError: err => {
+        const error = err as Error;
+        setError(error.message || 'Failed to create user');
+      },
+    });
+  };
+
+  // Handle user deletion
+  const handleDeleteUser = async (userId: number, username: string) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete user "${username}"? This action cannot be undone.`
+      )
+    ) {
+      try {
+        await deleteUser.mutateAsync(userId);
+        setSnackbarMsg('User deleted successfully');
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || 'Failed to delete user');
+      }
     }
   };
 
   return (
     <MainContainer title='User Management'>
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={handleOpenDialogForCreate}
-        sx={{ mb: 2 }}
-        startIcon={<PersonAddIcon />}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
       >
-        Add User
-      </Button>
+        <Typography variant='h4' component='h1'>
+          Users
+        </Typography>
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={handleOpenDialogForCreate}
+          startIcon={<PersonAddIcon />}
+        >
+          Add User
+        </Button>
+      </Box>
 
       {loading ? (
         <Box display='flex' justifyContent='center' mt={4}>
@@ -145,21 +180,12 @@ const UsersPage: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Tooltip title='Delete'>
+                    <Tooltip title='Delete User'>
                       <IconButton
                         size='small'
                         color='error'
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              'Are you sure you want to delete this user?'
-                            )
-                          ) {
-                            setSnackbarMsg(
-                              'Delete functionality not implemented yet'
-                            );
-                          }
-                        }}
+                        onClick={() => handleDeleteUser(user.id, user.username)}
+                        disabled={deleteUser.isPending}
                       >
                         <DeleteIcon />
                       </IconButton>

@@ -69,7 +69,39 @@ export const useCreateIngredient = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
+    onMutate: async (newItem: CreateIngredientCommand) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ingredientKeys.lists() });
+
+      // Snapshot the previous value
+      const previousIngredients = queryClient.getQueryData<IngredientDto[]>(
+        ingredientKeys.lists()
+      );
+
+      // Optimistically update to the new value
+      if (previousIngredients) {
+        const optimisticIngredient: IngredientDto = {
+          id: Date.now(), // Temporary ID
+          ...newItem,
+        };
+        queryClient.setQueryData<IngredientDto[]>(ingredientKeys.lists(), [
+          ...previousIngredients,
+          optimisticIngredient,
+        ]);
+      }
+
+      return { previousIngredients };
+    },
+    onError: (_err, _newItem, context) => {
+      // Rollback on error
+      if (context?.previousIngredients) {
+        queryClient.setQueryData(
+          ingredientKeys.lists(),
+          context.previousIngredients
+        );
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ingredientKeys.lists() });
     },
   });
@@ -106,7 +138,35 @@ export const useDeleteIngredient = () => {
       await apiInstance.delete(`/ingredients/${id}`);
       return id;
     },
-    onSuccess: id => {
+    onMutate: async (id: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ingredientKeys.lists() });
+
+      // Snapshot the previous value
+      const previousIngredients = queryClient.getQueryData<IngredientDto[]>(
+        ingredientKeys.lists()
+      );
+
+      // Optimistically update to remove the ingredient
+      if (previousIngredients) {
+        queryClient.setQueryData<IngredientDto[]>(
+          ingredientKeys.lists(),
+          previousIngredients.filter(item => item.id !== id)
+        );
+      }
+
+      return { previousIngredients };
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousIngredients) {
+        queryClient.setQueryData(
+          ingredientKeys.lists(),
+          context.previousIngredients
+        );
+      }
+    },
+    onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: ingredientKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: ingredientKeys.lists() });
     },

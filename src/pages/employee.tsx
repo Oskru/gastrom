@@ -126,15 +126,20 @@ const EmployeesPage: React.FC = () => {
   };
 
   // Submit form to create employee
-  const handleSubmit = async () => {
-    try {
-      await createEmployee.mutateAsync(formState);
-      setSnackbarMsg('Employee created successfully');
-      handleCloseDialog();
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Failed to save employee');
-    }
+  const handleSubmit = () => {
+    // Close dialog immediately for optimistic UX
+    handleCloseDialog();
+
+    // Trigger mutation (optimistic update will show it immediately)
+    createEmployee.mutate(formState, {
+      onSuccess: () => {
+        setSnackbarMsg('Employee created successfully');
+      },
+      onError: err => {
+        const error = err as Error;
+        setError(error.message || 'Failed to save employee');
+      },
+    });
   };
 
   // Update employee hours
@@ -181,7 +186,17 @@ const EmployeesPage: React.FC = () => {
 
   return (
     <MainContainer title='Employee Management'>
-      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Typography variant='h4' component='h1'>
+          Employees
+        </Typography>
         <Button
           variant='contained'
           color='primary'
@@ -189,6 +204,10 @@ const EmployeesPage: React.FC = () => {
         >
           Add Employee
         </Button>
+      </Box>
+
+      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+        {/* Filter section */}
         {filteredEmployeeId !== null && !isNaN(filteredEmployeeId) && (
           <Button
             variant='outlined'
