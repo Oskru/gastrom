@@ -1,50 +1,278 @@
-# React + TypeScript + Vite
+# Gastrom - Restaurant Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, full-featured restaurant management application built with React,
+TypeScript, and Material-UI. Gastrom provides comprehensive tools for managing
+inventory, employees, sales transactions, fixed costs, and business analytics.
 
-Currently, two official plugins are available:
+![React](https://img.shields.io/badge/React-18.3-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)
+![Material-UI](https://img.shields.io/badge/MUI-6.4-blue)
+![License](https://img.shields.io/badge/license-private-red)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- **Dashboard Analytics** - Customizable dashboard with drag-and-drop tiles for
+  key business metrics
+- **Inventory Management** - Track and manage restaurant inventory in real-time
+- **Employee Management** - Manage staff information and schedules
+- **Sales Tracking** - Monitor transactions and generate sales reports
+- **Fixed Costs Management** - Track recurring expenses and overhead costs
+- **User Management** - Multi-user support with role-based access
+- **Authentication** - Secure Basic Authentication with protected routes
+- **Responsive Design** - Mobile-first approach with Material-UI components
+- **Dark Mode** - Light/dark theme toggle for better user experience
+- **Real-time Updates** - Powered by TanStack Query for efficient data
+  synchronization
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## 🛠️ Tech Stack
 
-- Configure the top-level `parserOptions` property like this:
+### Core
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **React 18** - Modern React with hooks and concurrent features
+- **TypeScript 5.6** - Type-safe development
+- **Vite 6** - Lightning-fast build tool and dev server
+
+### UI & Styling
+
+- **Material-UI v6** - Comprehensive component library
+- **Emotion** - CSS-in-JS styling solution
+- **Recharts** - Beautiful and composable charts
+- **@dnd-kit** - Drag-and-drop functionality for dashboard customization
+
+### Data & State Management
+
+- **TanStack Query v5** - Powerful data synchronization and caching
+- **React Router v7** - Client-side routing with protected routes
+- **Axios** - HTTP client with interceptors for authentication
+- **Zod** - Schema validation and type inference
+
+### Developer Experience
+
+- **ESLint** - Code linting with TypeScript support
+- **Prettier** - Code formatting
+- **Playwright** - End-to-end testing framework
+
+## 📋 Prerequisites
+
+- **Node.js** - Version 16.x or higher
+- **npm** - Version 7.x or higher (comes with Node.js)
+- **Backend API** - Access to the Gastrom management API
+
+## 🚀 Getting Started
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/Oskru/gastrom.git
+   cd gastrom
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser** Navigate to
+   [http://localhost:5173](http://localhost:5173)
+
+### Build for Production
+
+```bash
+npm run build
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+The production-ready files will be in the `dist/` directory.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### Preview Production Build
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm run preview
 ```
+
+## 📁 Project Structure
+
+```
+gastrom/
+├── public/                 # Static assets
+├── src/
+│   ├── components/        # Reusable React components
+│   │   ├── material/     # Material-UI custom components
+│   │   └── dashboard/    # Dashboard-specific components
+│   ├── context/          # React Context providers
+│   │   ├── auth-context.tsx
+│   │   └── timeframe-context.tsx
+│   ├── hooks/            # Custom React hooks
+│   │   ├── use-auth.ts
+│   │   ├── use-inventory.ts
+│   │   ├── use-employees.ts
+│   │   └── ...
+│   ├── pages/            # Route components
+│   │   ├── home.tsx
+│   │   ├── inventory.tsx
+│   │   ├── employee.tsx
+│   │   └── ...
+│   ├── routing/          # Router configuration
+│   │   ├── routes.tsx
+│   │   └── protected-route.tsx
+│   ├── schemas/          # Zod validation schemas
+│   ├── styles/           # Theme and styling
+│   │   ├── AppTheme.tsx
+│   │   └── customizations/
+│   ├── types/            # TypeScript type definitions
+│   ├── utils/            # Utility functions
+│   │   └── api-instance.ts
+│   ├── consts/           # Constants and configuration
+│   └── main.tsx          # Application entry point
+├── tests/                # E2E tests
+│   └── e2e.test.spec.ts
+├── vite.config.ts        # Vite configuration
+├── tsconfig.json         # TypeScript configuration
+└── playwright.config.ts  # Playwright test configuration
+```
+
+## 🔐 Authentication
+
+Gastrom uses **Basic Authentication** with credentials stored securely in
+localStorage. The authentication flow:
+
+1. Users log in via `/login` route
+2. Credentials are encoded and stored in localStorage
+3. All API requests include the Authorization header automatically
+4. Protected routes check authentication status before rendering
+
+### Authentication Context
+
+The `AuthContext` (`src/context/auth-context.tsx`) manages authentication state
+globally:
+
+- Stores user information and token
+- Provides login/logout functionality
+- Persists authentication across page refreshes
+
+## 🔌 API Integration
+
+The application connects to a backend API at:
+
+```
+https://management-api-irsm.onrender.com/api/v1
+```
+
+All API calls use the centralized `apiInstance` from `src/utils/api-instance.ts`
+which:
+
+- Automatically injects Basic Auth headers
+- Handles request/response interceptors
+- Provides consistent error handling
+
+## 🧪 Testing
+
+### End-to-End Tests
+
+Run Playwright tests in headless mode:
+
+```bash
+npm run test:e2e
+```
+
+Run tests with interactive UI:
+
+```bash
+npm run test:e2e-ui
+```
+
+### Test Coverage
+
+The test suite includes:
+
+- Authentication flow testing
+- Navigation between pages
+- Dashboard element rendering
+- Data fetching and display
+
+## 🎨 Theming
+
+Gastrom features a fully customizable theme system with:
+
+- Light and dark mode support
+- Custom Material-UI component overrides
+- CSS variables for consistent styling
+- Responsive breakpoints for mobile/tablet/desktop
+
+Theme configuration: `src/styles/AppTheme.tsx`
+
+## 📊 Data Management
+
+### TanStack Query
+
+All data fetching uses TanStack Query with:
+
+- Automatic caching and background refetching
+- Optimistic updates for better UX
+- Query invalidation on mutations
+- Structured query key factories
+
+Example from `use-inventory.ts`:
+
+```typescript
+export const inventoryKeys = {
+  all: ['inventory'] as const,
+  lists: () => [...inventoryKeys.all, 'list'] as const,
+};
+```
+
+## 🚦 Available Scripts
+
+| Command               | Description                                      |
+| --------------------- | ------------------------------------------------ |
+| `npm run dev`         | Start development server on localhost:5173       |
+| `npm run build`       | Build for production (includes TypeScript check) |
+| `npm run lint`        | Run ESLint to check code quality                 |
+| `npm run preview`     | Preview production build locally                 |
+| `npm run test:e2e`    | Run Playwright E2E tests (headless)              |
+| `npm run test:e2e-ui` | Run Playwright tests with interactive UI         |
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 Code Conventions
+
+- **Import Extensions**: Always include `.tsx`/`.ts` extensions in relative
+  imports
+- **Component Props**: Use interface definitions rather than inline types
+- **Error Handling**: Use try-catch in async operations with user-friendly error
+  messages
+- **Hooks**: Prefix custom hooks with `use-`
+- **Responsive Design**: Mobile-first approach using MUI breakpoints
+
+## 📄 License
+
+This project is private and proprietary.
+
+## 👥 Authors
+
+- **Oskru** - [GitHub Profile](https://github.com/Oskru)
+
+## 🔗 Links
+
+- [Backend API](https://management-api-irsm.onrender.com)
+- [Material-UI Documentation](https://mui.com/)
+- [TanStack Query Documentation](https://tanstack.com/query/latest)
+- [Vite Documentation](https://vitejs.dev/)
+
+---
+
+**Built with ❤️ for restaurant management**
