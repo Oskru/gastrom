@@ -7,7 +7,6 @@ import EmployeesPage from '../pages/employee.tsx';
 import UsersPage from '../pages/users.tsx';
 import About from '../pages/about.tsx';
 import MyAccount from '../pages/my-account.tsx';
-import SalesReport from '../pages/sales-report.tsx';
 import Feedback from '../pages/feedback.tsx';
 import FixedCostsPage from '../pages/fixed-costs.tsx';
 
@@ -56,10 +55,6 @@ const routesForAuthenticatedOnly = [
       {
         path: '/fixed-costs',
         element: <FixedCostsPage />,
-      },
-      {
-        path: '/sales-reports',
-        element: <SalesReport />,
       },
       {
         path: '/about',

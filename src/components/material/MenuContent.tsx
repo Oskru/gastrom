@@ -6,7 +6,6 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import AnalyticsRoundedIcon from '@mui/icons-material/AnalyticsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -40,11 +39,6 @@ const mainListItems = [
     icon: <ManageAccounts />,
     url: '/users',
     requiresAdmin: true,
-  },
-  {
-    text: 'Sales reports',
-    icon: <AnalyticsRoundedIcon />,
-    url: '/sales-reports',
   },
 ];
 

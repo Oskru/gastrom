@@ -49,12 +49,6 @@ test.describe('App Integration Tests with JWT Auth', () => {
     await expect(page.locator('text=Employee Management')).toBeVisible();
   });
 
-  test('Navigate to Sales Report page', async ({ page }) => {
-    // Assuming your navigation has a link with "Sales Report"
-    await page.click('text=Sales Report');
-    await expect(page.locator('text=Sales Report')).toBeVisible();
-  });
-
   test('Refresh Dashboard data from Home page', async ({ page }) => {
     // Locate and click the "Refresh Dashboard" button.
     await page.click('text=Refresh Dashboard');
