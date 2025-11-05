@@ -32,6 +32,8 @@ export const inputsCustomizations: Components<Theme> = {
         boxShadow: 'none',
         borderRadius: (theme.vars || theme).shape.borderRadius,
         textTransform: 'none',
+        fontWeight: 600,
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         variants: [
           {
             props: {
@@ -39,7 +41,8 @@ export const inputsCustomizations: Components<Theme> = {
             },
             style: {
               height: '2.25rem',
-              padding: '8px 12px',
+              padding: '8px 16px',
+              fontSize: '0.875rem',
             },
           },
           {
@@ -47,7 +50,9 @@ export const inputsCustomizations: Components<Theme> = {
               size: 'medium',
             },
             style: {
-              height: '2.5rem', // 40px
+              height: '2.75rem',
+              padding: '10px 20px',
+              fontSize: '0.9375rem',
             },
           },
           {
@@ -57,31 +62,24 @@ export const inputsCustomizations: Components<Theme> = {
             },
             style: {
               color: 'white',
-              backgroundColor: gray[900],
-              backgroundImage: `linear-gradient(to bottom, ${gray[700]}, ${gray[800]})`,
-              boxShadow: `inset 0 1px 0 ${gray[600]}, inset 0 -1px 0 1px hsl(220, 0%, 0%)`,
-              border: `1px solid ${gray[700]}`,
+              background: `linear-gradient(135deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
+              boxShadow: `0 4px 12px ${alpha(brand[500], 0.3)}`,
+              border: 'none',
               '&:hover': {
-                backgroundImage: 'none',
-                backgroundColor: gray[700],
-                boxShadow: 'none',
+                background: `linear-gradient(135deg, ${brand[600]} 0%, ${brand[800]} 100%)`,
+                boxShadow: `0 6px 16px ${alpha(brand[600], 0.4)}`,
+                transform: 'translateY(-1px)',
               },
               '&:active': {
-                backgroundColor: gray[800],
+                transform: 'translateY(0)',
+                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
               },
               ...theme.applyStyles('dark', {
-                color: 'black',
-                backgroundColor: gray[50],
-                backgroundImage: `linear-gradient(to bottom, ${gray[100]}, ${gray[50]})`,
-                boxShadow: 'inset 0 -1px 0  hsl(220, 30%, 80%)',
-                border: `1px solid ${gray[50]}`,
+                background: `linear-gradient(135deg, ${brand[400]} 0%, ${brand[600]} 100%)`,
+                boxShadow: `0 4px 12px ${alpha(brand[400], 0.4)}`,
                 '&:hover': {
-                  backgroundImage: 'none',
-                  backgroundColor: gray[300],
-                  boxShadow: 'none',
-                },
-                '&:active': {
-                  backgroundColor: gray[400],
+                  background: `linear-gradient(135deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
+                  boxShadow: `0 6px 16px ${alpha(brand[500], 0.5)}`,
                 },
               }),
             },
@@ -383,22 +381,29 @@ export const inputsCustomizations: Components<Theme> = {
         padding: 0,
       },
       root: ({ theme }) => ({
-        padding: '8px 12px',
+        padding: '10px 14px',
         color: (theme.vars || theme).palette.text.primary,
         borderRadius: (theme.vars || theme).shape.borderRadius,
-        border: `1px solid ${(theme.vars || theme).palette.divider}`,
-        backgroundColor: (theme.vars || theme).palette.background.default,
-        transition: 'border 120ms ease-in',
+        border: `1px solid ${alpha(gray[300], 0.6)}`,
+        backgroundColor: (theme.vars || theme).palette.background.paper,
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
         '&:hover': {
-          borderColor: gray[400],
+          borderColor: alpha(brand[500], 0.4),
+          boxShadow: `0 2px 4px rgba(0, 0, 0, 0.06), 0 0 0 1px ${alpha(brand[500], 0.1)}`,
         },
         [`&.${outlinedInputClasses.focused}`]: {
-          outline: `3px solid ${alpha(brand[500], 0.5)}`,
-          borderColor: brand[400],
+          outline: `3px solid ${alpha(brand[500], 0.15)}`,
+          borderColor: brand[500],
+          boxShadow: `0 4px 8px ${alpha(brand[500], 0.15)}`,
         },
         ...theme.applyStyles('dark', {
+          backgroundColor: alpha(gray[900], 0.4),
+          border: `1px solid ${alpha(gray[700], 0.5)}`,
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
           '&:hover': {
-            borderColor: gray[500],
+            borderColor: alpha(brand[400], 0.5),
+            boxShadow: `0 2px 4px rgba(0, 0, 0, 0.4), 0 0 0 1px ${alpha(brand[400], 0.2)}`,
           },
         }),
         variants: [

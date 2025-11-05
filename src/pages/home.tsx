@@ -109,6 +109,7 @@ const HomePage: React.FC = () => {
   return (
     <MainContainer title='Dashboard'>
       <Box
+        className='page-transition'
         sx={{
           px: { xs: 2, md: 4 },
           py: { xs: 2, md: 4 },

@@ -19,6 +19,7 @@ declare module '@mui/material/styles/createPalette' {
     900: string;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface PaletteColor extends ColorRange {}
 
   interface Palette {
@@ -31,29 +32,29 @@ const defaultTheme = createTheme();
 const customShadows: Shadows = [...defaultTheme.shadows];
 
 export const brand = {
-  50: 'hsl(210, 100%, 98%)',
-  100: 'hsl(210, 100%, 94%)',
-  200: 'hsl(210, 100%, 85%)',
-  300: 'hsl(210, 100%, 70%)',
-  400: 'hsl(210, 98%, 55%)',
-  500: 'hsl(210, 98%, 45%)',
-  600: 'hsl(210, 98%, 40%)',
-  700: 'hsl(210, 100%, 35%)',
-  800: 'hsl(210, 100%, 25%)',
-  900: 'hsl(210, 100%, 20%)',
+  50: 'hsl(250, 100%, 98%)',
+  100: 'hsl(250, 95%, 95%)',
+  200: 'hsl(250, 90%, 88%)',
+  300: 'hsl(250, 85%, 75%)',
+  400: 'hsl(250, 80%, 60%)',
+  500: 'hsl(250, 75%, 50%)',
+  600: 'hsl(250, 70%, 45%)',
+  700: 'hsl(250, 65%, 38%)',
+  800: 'hsl(250, 60%, 30%)',
+  900: 'hsl(250, 55%, 20%)',
 };
 
 export const gray = {
-  50: 'hsl(220, 20%, 98%)',
-  100: 'hsl(220, 15%, 95%)',
-  200: 'hsl(220, 15%, 90%)',
-  300: 'hsl(220, 15%, 85%)',
-  400: 'hsl(220, 15%, 70%)',
-  500: 'hsl(220, 15%, 50%)',
-  600: 'hsl(220, 15%, 40%)',
-  700: 'hsl(220, 15%, 30%)',
-  800: 'hsl(220, 20%, 15%)',
-  900: 'hsl(220, 25%, 10%)',
+  50: 'hsl(220, 25%, 98%)',
+  100: 'hsl(220, 20%, 96%)',
+  200: 'hsl(220, 18%, 92%)',
+  300: 'hsl(220, 16%, 86%)',
+  400: 'hsl(220, 14%, 71%)',
+  500: 'hsl(220, 12%, 55%)',
+  600: 'hsl(220, 14%, 45%)',
+  700: 'hsl(220, 16%, 35%)',
+  800: 'hsl(220, 20%, 20%)',
+  900: 'hsl(220, 26%, 12%)',
 };
 
 export const green = {
@@ -161,13 +162,13 @@ export const getDesignTokens = (mode: PaletteMode) => {
       grey: {
         ...gray,
       },
-      divider: mode === 'dark' ? alpha(gray[700], 0.6) : alpha(gray[300], 0.4),
+      divider: mode === 'dark' ? alpha(gray[700], 0.4) : alpha(gray[300], 0.3),
       background: {
-        default: 'hsl(0, 0%, 99%)',
-        paper: 'hsl(220, 35%, 97%)',
+        default: 'hsl(220, 30%, 99%)',
+        paper: 'hsl(0, 0%, 100%)',
         ...(mode === 'dark' && {
-          default: gray[900],
-          paper: 'hsl(220, 30%, 7%)',
+          default: 'hsl(220, 25%, 8%)',
+          paper: 'hsl(220, 28%, 11%)',
         }),
       },
       text: {
@@ -250,7 +251,7 @@ export const getDesignTokens = (mode: PaletteMode) => {
       },
     },
     shape: {
-      borderRadius: 12,
+      borderRadius: 16,
     },
     shadows: customShadows,
   };
@@ -289,10 +290,10 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: alpha(gray[300], 0.4),
+      divider: alpha(gray[300], 0.3),
       background: {
-        default: 'hsl(0, 0%, 99%)',
-        paper: 'hsl(220, 35%, 97%)',
+        default: 'hsl(220, 30%, 99%)',
+        paper: 'hsl(0, 0%, 100%)',
       },
       text: {
         primary: gray[800],
@@ -339,10 +340,10 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: alpha(gray[700], 0.6),
+      divider: alpha(gray[700], 0.4),
       background: {
-        default: gray[900],
-        paper: 'hsl(220, 30%, 7%)',
+        default: 'hsl(220, 25%, 8%)',
+        paper: 'hsl(220, 28%, 11%)',
       },
       text: {
         primary: 'hsl(0, 0%, 100%)',
@@ -421,10 +422,10 @@ export const typography = {
 };
 
 export const shape = {
-  borderRadius: 12,
+  borderRadius: 16,
 };
 
-// @ts-ignore
+// @ts-expect-error - Shadow array type mismatch
 const defaultShadows: Shadows = [
   'none',
   'var(--template-palette-baseShadow)',

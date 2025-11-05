@@ -2,7 +2,6 @@ import { alpha, Theme, Components } from '@mui/material/styles';
 import { gray } from '../themePrimitives';
 import type {} from '@mui/material/themeCssVarsAugmentation';
 
-/* eslint-disable import/prefer-default-export */
 export const surfacesCustomizations: Components<Theme> = {
   MuiAccordion: {
     defaultProps: {
@@ -55,20 +54,48 @@ export const surfacesCustomizations: Components<Theme> = {
     defaultProps: {
       elevation: 0,
     },
+    styleOverrides: {
+      root: ({ theme }) => ({
+        backgroundImage: 'none',
+        backgroundColor: 'hsl(0, 0%, 100%)',
+        border: `1px solid ${alpha(gray[300], 0.5)}`,
+        borderRadius: (theme.vars || theme).shape.borderRadius,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+        transition: 'all 0.2s ease',
+        ...theme.applyStyles('dark', {
+          backgroundColor: alpha(gray[900], 0.4),
+          border: `1px solid ${alpha(gray[700], 0.3)}`,
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+        }),
+      }),
+    },
   },
   MuiCard: {
     styleOverrides: {
       root: ({ theme }) => {
         return {
-          padding: 16,
+          padding: 20,
           gap: 16,
-          transition: 'all 100ms ease',
-          backgroundColor: gray[50],
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          backgroundColor: 'hsl(0, 0%, 100%)',
           borderRadius: (theme.vars || theme).shape.borderRadius,
-          border: `1px solid ${(theme.vars || theme).palette.divider}`,
-          boxShadow: 'none',
+          border: `1px solid ${alpha(gray[300], 0.5)}`,
+          boxShadow:
+            '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)',
+          '&:hover': {
+            boxShadow:
+              '0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04)',
+            transform: 'translateY(-2px)',
+          },
           ...theme.applyStyles('dark', {
-            backgroundColor: gray[800],
+            backgroundColor: alpha(gray[900], 0.6),
+            border: `1px solid ${alpha(gray[700], 0.3)}`,
+            boxShadow:
+              '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4)',
+            '&:hover': {
+              boxShadow:
+                '0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3)',
+            },
           }),
           variants: [
             {

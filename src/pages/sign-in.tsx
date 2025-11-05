@@ -18,18 +18,24 @@ const Card = styled(MuiCard)(({ theme }) => ({
   flexDirection: 'column',
   alignSelf: 'center',
   width: '100%',
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
+  padding: theme.spacing(5),
+  gap: theme.spacing(3),
   margin: 'auto',
   [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
+    maxWidth: '480px',
   },
+  borderRadius: '24px',
+  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(102, 126, 234, 0.2)' : 'rgba(102, 126, 234, 0.15)'}`,
+  background:
+    theme.palette.mode === 'dark'
+      ? 'linear-gradient(135deg, rgba(30, 30, 35, 0.95) 0%, rgba(20, 20, 25, 0.98) 100%)'
+      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 250, 252, 0.95) 100%)',
+  backdropFilter: 'blur(20px)',
   boxShadow:
-    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
-  ...theme.applyStyles('dark', {
-    boxShadow:
-      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
-  }),
+    theme.palette.mode === 'dark'
+      ? '0 24px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(102, 126, 234, 0.1)'
+      : '0 24px 48px rgba(102, 126, 234, 0.12), 0 0 0 1px rgba(102, 126, 234, 0.08)',
+  animation: 'scaleIn 0.4s ease-out',
 }));
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
@@ -39,19 +45,20 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
     padding: theme.spacing(4),
   },
+  position: 'relative',
   '&::before': {
     content: '""',
     display: 'block',
     position: 'absolute',
     zIndex: -1,
     inset: 0,
-    backgroundImage:
-      'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
+    background:
+      theme.palette.mode === 'dark'
+        ? 'radial-gradient(ellipse at 30% 20%, rgba(102, 126, 234, 0.15), transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(118, 75, 162, 0.15), transparent 50%), hsl(220, 25%, 8%)'
+        : 'radial-gradient(ellipse at 30% 20%, rgba(102, 126, 234, 0.08), transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(118, 75, 162, 0.08), transparent 50%), hsl(220, 30%, 99%)',
     backgroundRepeat: 'no-repeat',
-    ...theme.applyStyles('dark', {
-      backgroundImage:
-        'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
-    }),
+    animation: 'gradient 15s ease infinite',
+    backgroundSize: '200% 200%',
   },
 }));
 
@@ -120,9 +127,25 @@ export default function SignIn() {
           <Typography
             component='h1'
             variant='h4'
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            sx={{
+              width: '100%',
+              fontSize: 'clamp(2rem, 10vw, 2.5rem)',
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              mb: 1,
+            }}
           >
-            Sign in
+            Welcome Back
+          </Typography>
+          <Typography
+            variant='body2'
+            color='text.secondary'
+            sx={{ mb: 2, fontWeight: 500 }}
+          >
+            Sign in to continue to your dashboard
           </Typography>
           <Box
             component='form'

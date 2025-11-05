@@ -27,17 +27,25 @@ const SideDrawer = styled(MuiDrawer, {
   whiteSpace: 'nowrap',
   boxSizing: 'border-box',
   transition: theme.transitions.create(['width'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
+    easing: theme.transitions.easing.easeInOut,
+    duration: theme.transitions.duration.standard,
   }),
   overflowX: 'hidden',
   [`& .${drawerClasses.paper}`]: {
     width: open ? drawerWidth : collapsedWidth,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor:
+      theme.palette.mode === 'dark'
+        ? 'rgba(18, 18, 23, 0.95)'
+        : 'rgba(255, 255, 255, 0.98)',
+    backdropFilter: 'blur(20px)',
     borderRight: `1px solid ${theme.palette.divider}`,
-    transition: theme.transitions.create(['width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
+    boxShadow:
+      theme.palette.mode === 'dark'
+        ? '2px 0 12px rgba(0, 0, 0, 0.5)'
+        : '2px 0 12px rgba(0, 0, 0, 0.08)',
+    transition: theme.transitions.create(['width', 'background-color'], {
+      easing: theme.transitions.easing.easeInOut,
+      duration: theme.transitions.duration.standard,
     }),
   },
 }));
@@ -63,6 +71,7 @@ export default function SideMenu() {
     if (isMobile === isOpen) {
       setIsOpen(!isMobile);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
 
   return (
@@ -93,20 +102,33 @@ export default function SideMenu() {
           minHeight: 72,
           overflow: 'hidden',
           position: 'relative',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, rgba(118, 75, 162, 0.04) 100%)',
         }}
       >
         <Avatar
           alt={user?.firstName + ' ' + user?.lastName}
           src={userAvatarUrl}
           sx={{
-            width: isOpen ? 40 : 36,
-            height: isOpen ? 40 : 36,
+            width: isOpen ? 44 : 36,
+            height: isOpen ? 44 : 36,
             mx: isOpen ? 0 : 'auto',
+            border: '2px solid',
+            borderColor: theme =>
+              theme.palette.mode === 'dark'
+                ? 'rgba(102, 126, 234, 0.3)'
+                : 'rgba(102, 126, 234, 0.2)',
+            boxShadow: theme =>
+              theme.palette.mode === 'dark'
+                ? '0 4px 12px rgba(102, 126, 234, 0.2)'
+                : '0 2px 8px rgba(102, 126, 234, 0.15)',
             transition: theme.transitions.create(
-              ['width', 'height', 'margin'],
+              ['width', 'height', 'margin', 'border-color', 'box-shadow'],
               {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
+                easing: theme.transitions.easing.easeInOut,
+                duration: theme.transitions.duration.standard,
               }
             ),
           }}

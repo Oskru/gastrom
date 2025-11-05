@@ -16,6 +16,9 @@ import '@fontsource/roboto/700.css';
 // @ts-expect-error this is resolved
 import '@fontsource/inter';
 
+// animations
+import './styles/animations.css';
+
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(

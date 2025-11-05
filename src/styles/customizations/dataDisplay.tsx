@@ -94,8 +94,15 @@ export const dataDisplayCustomizations: Components<Theme> = {
       root: ({ theme }) => ({
         border: '1px solid',
         borderRadius: '999px',
+        transition: 'all 0.2s ease',
+        fontWeight: 600,
         [`& .${chipClasses.label}`]: {
           fontWeight: 600,
+          padding: '0 12px',
+        },
+        '&:hover': {
+          transform: 'translateY(-1px)',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         },
         variants: [
           {
@@ -197,8 +204,80 @@ export const dataDisplayCustomizations: Components<Theme> = {
       }),
     },
   },
+  MuiTableContainer: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        borderRadius: theme.shape.borderRadius,
+        overflow: 'hidden',
+        border: `1px solid ${alpha(gray[300], 0.5)}`,
+        ...theme.applyStyles('dark', {
+          border: `1px solid ${alpha(gray[700], 0.3)}`,
+        }),
+      }),
+    },
+  },
+  MuiTable: {
+    styleOverrides: {
+      root: {
+        borderCollapse: 'separate',
+        borderSpacing: 0,
+      },
+    },
+  },
+  MuiTableHead: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        background:
+          theme.palette.mode === 'dark'
+            ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%)'
+            : 'linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, rgba(118, 75, 162, 0.04) 100%)',
+        '& .MuiTableCell-head': {
+          fontWeight: 700,
+          fontSize: '0.875rem',
+          letterSpacing: '0.02em',
+          textTransform: 'uppercase',
+          color: theme.palette.mode === 'dark' ? gray[300] : gray[700],
+          borderBottom: `2px solid ${theme.palette.mode === 'dark' ? alpha(gray[700], 0.5) : alpha(gray[300], 0.8)}`,
+        },
+      }),
+    },
+  },
+  MuiTableBody: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        '& .MuiTableRow-root': {
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? alpha(gray[800], 0.5)
+                : alpha(gray[100], 0.5),
+            transform: 'scale(1.001)',
+          },
+          '&:last-child .MuiTableCell-root': {
+            borderBottom: 'none',
+          },
+        },
+      }),
+    },
+  },
+  MuiTableCell: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        padding: '16px 20px',
+        borderBottom: `1px solid ${theme.palette.mode === 'dark' ? alpha(gray[800], 0.5) : alpha(gray[200], 0.5)}`,
+      }),
+    },
+  },
   MuiTablePagination: {
     styleOverrides: {
+      root: ({ theme }) => ({
+        borderTop: `1px solid ${theme.palette.divider}`,
+        backgroundColor:
+          theme.palette.mode === 'dark'
+            ? alpha(gray[900], 0.3)
+            : alpha(gray[50], 0.5),
+      }),
       actions: {
         display: 'flex',
         gap: 8,

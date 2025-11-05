@@ -24,11 +24,45 @@ export const feedbackCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         '& .MuiDialog-paper': {
-          borderRadius: '10px',
+          borderRadius: '20px',
           border: '1px solid',
-          borderColor: (theme.vars || theme).palette.divider,
+          borderColor: alpha(gray[300], 0.5),
+          boxShadow:
+            theme.palette.mode === 'dark'
+              ? '0 24px 48px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.4)'
+              : '0 24px 48px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08)',
+          backdropFilter: 'blur(20px)',
+          background:
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(30, 30, 35, 0.95) 0%, rgba(20, 20, 25, 0.98) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 250, 252, 0.98) 100%)',
+          ...theme.applyStyles('dark', {
+            borderColor: alpha(gray[700], 0.4),
+          }),
+        },
+        '& .MuiDialogTitle-root': {
+          fontSize: '1.5rem',
+          fontWeight: 700,
+          paddingBottom: '16px',
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        },
+        '& .MuiDialogContent-root': {
+          paddingTop: '24px',
+        },
+        '& .MuiDialogActions-root': {
+          padding: '16px 24px',
+          borderTop: `1px solid ${theme.palette.divider}`,
+          gap: '12px',
         },
       }),
+    },
+  },
+  MuiBackdrop: {
+    styleOverrides: {
+      root: {
+        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      },
     },
   },
   MuiLinearProgress: {
@@ -41,6 +75,20 @@ export const feedbackCustomizations: Components<Theme> = {
           backgroundColor: gray[800],
         }),
       }),
+      bar: {
+        borderRadius: 8,
+        background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+      },
+    },
+  },
+  MuiCircularProgress: {
+    styleOverrides: {
+      root: {
+        color: '#667eea',
+      },
+      circle: {
+        strokeLinecap: 'round',
+      },
     },
   },
 };
