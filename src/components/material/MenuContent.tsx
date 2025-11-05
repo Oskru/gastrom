@@ -10,7 +10,12 @@ import AnalyticsRoundedIcon from '@mui/icons-material/AnalyticsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Inventory, PeopleRounded, ManageAccounts } from '@mui/icons-material';
+import {
+  Inventory,
+  PeopleRounded,
+  ManageAccounts,
+  AttachMoney,
+} from '@mui/icons-material';
 import { useUser } from '../../hooks/use-user';
 
 const mainListItems = [
@@ -24,6 +29,11 @@ const mainListItems = [
     text: 'Employees',
     icon: <PeopleRounded />,
     url: '/employees',
+  },
+  {
+    text: 'Fixed Costs',
+    icon: <AttachMoney />,
+    url: '/fixed-costs',
   },
   {
     text: 'Users',
