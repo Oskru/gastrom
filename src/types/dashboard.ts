@@ -15,7 +15,6 @@ export type DashboardTileType =
   | 'fixed-costs'
   | 'cash-income'
   | 'card-income'
-  | 'transaction-count'
   | 'last-transaction'
   | 'avg-margin'
   | 'avg-items-per-order'
@@ -112,13 +111,6 @@ export const TILE_DEFINITIONS: TileDefinition[] = [
     description: 'Revenue from card payments',
     defaultWidth: 3,
     icon: 'CreditCard',
-  },
-  {
-    type: 'transaction-count',
-    label: 'Transaction Count',
-    description: 'Total number of transactions',
-    defaultWidth: 3,
-    icon: 'Receipt',
   },
   {
     type: 'last-transaction',

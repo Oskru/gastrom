@@ -309,11 +309,45 @@ export const LowStockAlertTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(255, 121, 63, 0.15) 0%, rgba(255, 87, 34, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 121, 63, 0.08) 0%, rgba(255, 87, 34, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(255, 121, 63, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <InventoryIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 121, 63, 0.2)'
+                    : 'rgba(255, 121, 63, 0.12)',
+                mr: 2,
+              }}
+            >
+              <InventoryIcon sx={{ color: '#FF793F', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Low Stock Items
             </Typography>
           </Box>
@@ -321,10 +355,25 @@ export const LowStockAlertTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #FF793F 0%, #FF5722 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 {lowStockItems.length}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Items need attention
               </Typography>
             </>
@@ -607,11 +656,45 @@ export const HighestOrderTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(255, 71, 87, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 107, 107, 0.08) 0%, rgba(255, 71, 87, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(255, 107, 107, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <TrendingUpIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 107, 107, 0.2)'
+                    : 'rgba(255, 107, 107, 0.12)',
+                mr: 2,
+              }}
+            >
+              <TrendingUpIcon sx={{ color: '#FF6B6B', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Highest Order
             </Typography>
           </Box>
@@ -619,10 +702,25 @@ export const HighestOrderTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${highestOrderValue.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Highest single order
               </Typography>
             </>
@@ -641,11 +739,45 @@ export const TotalProfitTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(32, 191, 107, 0.15) 0%, rgba(38, 222, 129, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(32, 191, 107, 0.08) 0%, rgba(38, 222, 129, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(32, 191, 107, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <ShowChartIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(32, 191, 107, 0.2)'
+                    : 'rgba(32, 191, 107, 0.12)',
+                mr: 2,
+              }}
+            >
+              <ShowChartIcon sx={{ color: '#20BF6B', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Total Profit
             </Typography>
           </Box>
@@ -653,10 +785,25 @@ export const TotalProfitTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #20BF6B 0%, #26DE81 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${totalProfit.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Revenue minus expenses
               </Typography>
             </>
@@ -675,11 +822,45 @@ export const TotalExpenseTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(250, 130, 49, 0.15) 0%, rgba(247, 159, 31, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(250, 130, 49, 0.08) 0%, rgba(247, 159, 31, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(250, 130, 49, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <MoneyOffIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(250, 130, 49, 0.2)'
+                    : 'rgba(250, 130, 49, 0.12)',
+                mr: 2,
+              }}
+            >
+              <MoneyOffIcon sx={{ color: '#FA8231', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Total Expenses
             </Typography>
           </Box>
@@ -687,10 +868,25 @@ export const TotalExpenseTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #FA8231 0%, #F79F1F 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${totalExpense.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Sum of all costs
               </Typography>
             </>
@@ -709,11 +905,45 @@ export const IngredientCostsTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(162, 155, 254, 0.15) 0%, rgba(116, 185, 255, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(162, 155, 254, 0.08) 0%, rgba(116, 185, 255, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(162, 155, 254, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <KitchenIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(162, 155, 254, 0.2)'
+                    : 'rgba(162, 155, 254, 0.12)',
+                mr: 2,
+              }}
+            >
+              <KitchenIcon sx={{ color: '#A29BFE', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Ingredient Costs
             </Typography>
           </Box>
@@ -721,10 +951,25 @@ export const IngredientCostsTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #A29BFE 0%, #74B9FF 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${ingredientCosts.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Total cost of ingredients
               </Typography>
             </>
@@ -743,11 +988,45 @@ export const FixedCostsTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(253, 121, 168, 0.15) 0%, rgba(255, 107, 129, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(253, 121, 168, 0.08) 0%, rgba(255, 107, 129, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(253, 121, 168, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <BusinessIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(253, 121, 168, 0.2)'
+                    : 'rgba(253, 121, 168, 0.12)',
+                mr: 2,
+              }}
+            >
+              <BusinessIcon sx={{ color: '#FD79A8', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Fixed Costs
             </Typography>
           </Box>
@@ -755,10 +1034,25 @@ export const FixedCostsTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #FD79A8 0%, #FF6B81 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${fixedCosts.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Total fixed operational costs
               </Typography>
             </>
@@ -777,11 +1071,45 @@ export const CashIncomeTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(85, 230, 193, 0.15) 0%, rgba(39, 174, 96, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(85, 230, 193, 0.08) 0%, rgba(39, 174, 96, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(85, 230, 193, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <LocalAtmIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(85, 230, 193, 0.2)'
+                    : 'rgba(85, 230, 193, 0.12)',
+                mr: 2,
+              }}
+            >
+              <LocalAtmIcon sx={{ color: '#55E6C1', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Cash Income
             </Typography>
           </Box>
@@ -789,10 +1117,25 @@ export const CashIncomeTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #55E6C1 0%, #27AE60 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${cashIncome.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Revenue from cash payments
               </Typography>
             </>
@@ -811,11 +1154,45 @@ export const CardIncomeTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(89, 98, 117, 0.15) 0%, rgba(52, 73, 94, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(89, 98, 117, 0.08) 0%, rgba(52, 73, 94, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(89, 98, 117, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <CreditCardIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(89, 98, 117, 0.2)'
+                    : 'rgba(89, 98, 117, 0.12)',
+                mr: 2,
+              }}
+            >
+              <CreditCardIcon sx={{ color: '#596275', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Card Income
             </Typography>
           </Box>
@@ -823,45 +1200,26 @@ export const CardIncomeTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #596275 0%, #34495E 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${cardIncome.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Revenue from card payments
-              </Typography>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </TileWrapper>
-  );
-};
-
-// Transaction Count Tile
-export const TransactionCountTile: React.FC = () => {
-  const { timeframe } = useTimeframe();
-  const { data: overallStats, isLoading } = useStatistics(timeframe);
-  const transactionCount = overallStats?.transactionCount || 0;
-
-  return (
-    <TileWrapper>
-      <Card sx={{ height: '100%' }}>
-        <CardContent>
-          <Box display='flex' alignItems='center' mb={2}>
-            <ShoppingCartIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
-              Total Transactions
-            </Typography>
-          </Box>
-          {isLoading ? (
-            <CircularProgress size={24} />
-          ) : (
-            <>
-              <Typography variant='h4' color='primary' gutterBottom>
-                {transactionCount}
-              </Typography>
-              <Typography variant='body2' color='text.secondary'>
-                Total number of transactions
               </Typography>
             </>
           )}
@@ -883,11 +1241,45 @@ export const LastTransactionTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(108, 92, 231, 0.15) 0%, rgba(87, 88, 187, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(108, 92, 231, 0.08) 0%, rgba(87, 88, 187, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(108, 92, 231, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <ScheduleIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(108, 92, 231, 0.2)'
+                    : 'rgba(108, 92, 231, 0.12)',
+                mr: 2,
+              }}
+            >
+              <ScheduleIcon sx={{ color: '#6C5CE7', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Last Transaction
             </Typography>
           </Box>
@@ -895,10 +1287,25 @@ export const LastTransactionTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h5' color='primary' gutterBottom>
+              <Typography
+                variant='h5'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #6C5CE7 0%, #5758BB 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 {formattedTime}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Most recent sale
               </Typography>
             </>
@@ -917,11 +1324,45 @@ export const AvgMarginTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(0, 184, 148, 0.15) 0%, rgba(0, 206, 201, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(0, 184, 148, 0.08) 0%, rgba(0, 206, 201, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(0, 184, 148, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <PercentIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(0, 184, 148, 0.2)'
+                    : 'rgba(0, 184, 148, 0.12)',
+                mr: 2,
+              }}
+            >
+              <PercentIcon sx={{ color: '#00B894', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Avg Margin
             </Typography>
           </Box>
@@ -929,10 +1370,25 @@ export const AvgMarginTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #00B894 0%, #00CEC9 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 ${avgMargin.toFixed(2)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Average profit margin per transaction
               </Typography>
             </>
@@ -951,11 +1407,45 @@ export const AvgItemsPerOrderTile: React.FC = () => {
 
   return (
     <TileWrapper>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{
+          height: '100%',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(255, 159, 64, 0.15) 0%, rgba(255, 184, 0, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 159, 64, 0.08) 0%, rgba(255, 184, 0, 0.04) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background:
+              'radial-gradient(circle, rgba(255, 159, 64, 0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            transform: 'translate(30%, -30%)',
+          },
+        }}
+      >
         <CardContent>
           <Box display='flex' alignItems='center' mb={2}>
-            <ShoppingBasketIcon color='primary' sx={{ mr: 1 }} />
-            <Typography variant='h6' component='div'>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 3,
+                background: theme =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 159, 64, 0.2)'
+                    : 'rgba(255, 159, 64, 0.12)',
+                mr: 2,
+              }}
+            >
+              <ShoppingBasketIcon sx={{ color: '#FF9F40', fontSize: 28 }} />
+            </Box>
+            <Typography variant='h6' component='div' fontWeight={600}>
               Avg Items/Order
             </Typography>
           </Box>
@@ -963,10 +1453,25 @@ export const AvgItemsPerOrderTile: React.FC = () => {
             <CircularProgress size={24} />
           ) : (
             <>
-              <Typography variant='h4' color='primary' gutterBottom>
+              <Typography
+                variant='h3'
+                fontWeight={700}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #FF9F40 0%, #FFB800 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+                gutterBottom
+              >
                 {avgItems.toFixed(1)}
               </Typography>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                fontWeight={500}
+              >
                 Average items per order
               </Typography>
             </>
@@ -1160,8 +1665,6 @@ export const DashboardTileComponent: React.FC<DashboardTileProps> = ({
       return <CashIncomeTile />;
     case 'card-income':
       return <CardIncomeTile />;
-    case 'transaction-count':
-      return <TransactionCountTile />;
     case 'last-transaction':
       return <LastTransactionTile />;
     case 'avg-margin':
