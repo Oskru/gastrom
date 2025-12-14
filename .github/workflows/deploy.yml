@@ -7,15 +7,28 @@ on:
   pull_request:
     branches:
       - main
+  pull_request_target:
+    branches:
+      - main
 
 jobs:
   build:
+    # For pull_request_target from Dependabot, we need to check out the PR head
+    # but only run for trusted sources (Dependabot)
+    if: |
+      github.event_name != 'pull_request_target' ||
+      github.actor == 'dependabot[bot]'
     name: Build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # For pull_request_target, checkout the PR head to test the actual changes
+          ref:
+            ${{ github.event_name == 'pull_request_target' &&
+            github.event.pull_request.head.sha || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
