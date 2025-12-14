@@ -51,8 +51,10 @@ const MyAccountPage: React.FC = () => {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err: any) {
-      setError(err.message || 'Failed to change password');
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to change password'
+      );
     }
   };
 
@@ -67,29 +69,29 @@ const MyAccountPage: React.FC = () => {
         }}
       >
         {/* User Information Section */}
-        <Paper sx={{ p: 3, mb: 4 }}>
+        <Paper sx={{ p: 3, mb: 4 }} data-testid='user-info-section'>
           <Typography variant={isSmallScreen ? 'h5' : 'h4'} gutterBottom>
             My Account
           </Typography>
           {user ? (
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Typography variant='body1'>
+                <Typography variant='body1' data-testid='user-first-name'>
                   <strong>First Name:</strong> {user.firstName}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography variant='body1'>
+                <Typography variant='body1' data-testid='user-last-name'>
                   <strong>Last Name:</strong> {user.lastName}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
-                <Typography variant='body1'>
+                <Typography variant='body1' data-testid='user-email'>
                   <strong>Email:</strong> {user.email}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
-                <Typography variant='body1'>
+                <Typography variant='body1' data-testid='user-role'>
                   <strong>Role:</strong> {user.userRole}
                 </Typography>
               </Grid>
@@ -102,7 +104,7 @@ const MyAccountPage: React.FC = () => {
         </Paper>
 
         {/* Change Password Form */}
-        <Paper sx={{ p: 3 }}>
+        <Paper sx={{ p: 3 }} data-testid='change-password-section'>
           <Typography variant={isSmallScreen ? 'h6' : 'h5'} gutterBottom>
             Change Password
           </Typography>
@@ -116,6 +118,7 @@ const MyAccountPage: React.FC = () => {
                   required
                   value={oldPassword}
                   onChange={e => setOldPassword(e.target.value)}
+                  inputProps={{ 'data-testid': 'old-password-input' }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -126,6 +129,7 @@ const MyAccountPage: React.FC = () => {
                   required
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
+                  inputProps={{ 'data-testid': 'new-password-input' }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -136,10 +140,16 @@ const MyAccountPage: React.FC = () => {
                   required
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
+                  inputProps={{ 'data-testid': 'confirm-password-input' }}
                 />
               </Grid>
               <Grid item xs={12}>
-                <Button variant='contained' color='primary' type='submit'>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  type='submit'
+                  data-testid='change-password-button'
+                >
                   Change Password
                 </Button>
               </Grid>

@@ -147,6 +147,7 @@ const SalesReportsPage: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={handleOpenCreateDialog}
           disabled={createReportMutation.isPending}
+          data-testid='create-report-button'
         >
           Generate New Report
         </Button>
@@ -170,7 +171,11 @@ const SalesReportsPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper} elevation={2}>
+        <TableContainer
+          component={Paper}
+          elevation={2}
+          data-testid='reports-table'
+        >
           <Table>
             <TableHead>
               <TableRow>
@@ -184,7 +189,7 @@ const SalesReportsPage: React.FC = () => {
             <TableBody>
               {reports && reports.length > 0 ? (
                 reports.map(report => (
-                  <TableRow key={report.id} hover>
+                  <TableRow key={report.id} hover data-testid='report-row'>
                     <TableCell>
                       <Box
                         sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
@@ -224,6 +229,7 @@ const SalesReportsPage: React.FC = () => {
                         onClick={() => handleDownloadReport(report)}
                         disabled={downloadReportMutation.isPending}
                         title='Download Report'
+                        data-testid='download-report-button'
                       >
                         <DownloadIcon />
                       </IconButton>
@@ -233,7 +239,7 @@ const SalesReportsPage: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} align='center'>
-                    <Box sx={{ py: 4 }}>
+                    <Box sx={{ py: 4 }} data-testid='reports-empty'>
                       <Typography variant='body1' color='text.secondary'>
                         No reports available. Generate your first report to get
                         started.
@@ -254,6 +260,7 @@ const SalesReportsPage: React.FC = () => {
         fullScreen={fullScreenDialog}
         maxWidth='sm'
         fullWidth
+        data-testid='create-report-dialog'
       >
         <DialogTitle>Generate Sales Report</DialogTitle>
         <DialogContent>
@@ -268,6 +275,7 @@ const SalesReportsPage: React.FC = () => {
               error={!!formErrors.title}
               helperText={formErrors.title}
               placeholder='e.g., Q1 Sales Report'
+              inputProps={{ 'data-testid': 'report-title-input' }}
             />
             <TextField
               label='From Date'
@@ -282,6 +290,7 @@ const SalesReportsPage: React.FC = () => {
               InputLabelProps={{
                 shrink: true,
               }}
+              inputProps={{ 'data-testid': 'report-from-date-input' }}
             />
             <TextField
               label='To Date'
@@ -294,6 +303,7 @@ const SalesReportsPage: React.FC = () => {
               InputLabelProps={{
                 shrink: true,
               }}
+              inputProps={{ 'data-testid': 'report-to-date-input' }}
             />
             <Alert severity='info'>
               The report will be generated and automatically downloaded as a PDF
@@ -302,11 +312,17 @@ const SalesReportsPage: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseCreateDialog}>Cancel</Button>
+          <Button
+            onClick={handleCloseCreateDialog}
+            data-testid='report-dialog-cancel'
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleCreateReport}
             variant='contained'
             disabled={createReportMutation.isPending}
+            data-testid='report-dialog-submit'
           >
             {createReportMutation.isPending
               ? 'Generating...'

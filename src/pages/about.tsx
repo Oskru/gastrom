@@ -105,6 +105,7 @@ const AboutPage: React.FC = () => {
       >
         <IconButton
           onClick={() => navigate(-1)}
+          data-testid='about-back-button'
           sx={{
             backgroundColor: isDarkMode
               ? alpha(theme.palette.background.paper, 0.9)
@@ -128,6 +129,7 @@ const AboutPage: React.FC = () => {
 
       {/* Hero Section */}
       <Box
+        data-testid='about-hero'
         sx={{
           position: 'relative',
           overflow: 'hidden',

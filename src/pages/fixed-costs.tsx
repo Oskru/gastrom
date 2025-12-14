@@ -165,6 +165,7 @@ const FixedCostsPage: React.FC = () => {
           color='primary'
           startIcon={<AddIcon />}
           onClick={handleOpenDialog}
+          data-testid='add-fixed-cost-button'
         >
           Add Fixed Cost
         </Button>
@@ -189,7 +190,7 @@ const FixedCostsPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Paper sx={{ mb: 2, p: 2 }}>
+          <Paper sx={{ mb: 2, p: 2 }} data-testid='total-costs'>
             <Typography variant='h6'>
               Total Fixed Costs: {formatCurrency(totalCost)}
             </Typography>
@@ -199,7 +200,7 @@ const FixedCostsPage: React.FC = () => {
             </Typography>
           </Paper>
 
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} data-testid='fixed-costs-table'>
             <Table>
               <TableHead>
                 <TableRow>
@@ -226,7 +227,7 @@ const FixedCostsPage: React.FC = () => {
                   </TableRow>
                 ) : (
                   fixedCosts.map((cost: FixedCost) => (
-                    <TableRow key={cost.id}>
+                    <TableRow key={cost.id} data-testid='fixed-cost-row'>
                       <TableCell>{cost.description}</TableCell>
                       <TableCell>{formatCurrency(cost.cost)}</TableCell>
                       <TableCell>
@@ -244,6 +245,7 @@ const FixedCostsPage: React.FC = () => {
                             handleDeleteFixedCost(cost.id, cost.description)
                           }
                           size='small'
+                          data-testid='delete-fixed-cost-button'
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -264,6 +266,7 @@ const FixedCostsPage: React.FC = () => {
         fullScreen={fullScreenDialog}
         maxWidth='sm'
         fullWidth
+        data-testid='fixed-cost-dialog'
       >
         <DialogTitle>Add Fixed Cost</DialogTitle>
         <DialogContent>
@@ -280,6 +283,7 @@ const FixedCostsPage: React.FC = () => {
               fullWidth
               required
               autoFocus
+              inputProps={{ 'data-testid': 'fixed-cost-description-input' }}
             />
             <TextField
               label='Cost'
@@ -290,12 +294,20 @@ const FixedCostsPage: React.FC = () => {
               }
               fullWidth
               required
-              inputProps={{ min: 0, step: 0.01 }}
+              inputProps={{
+                min: 0,
+                step: 0.01,
+                'data-testid': 'fixed-cost-amount-input',
+              }}
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color='inherit'>
+          <Button
+            onClick={handleCloseDialog}
+            color='inherit'
+            data-testid='fixed-cost-dialog-cancel'
+          >
             Cancel
           </Button>
           <Button
@@ -303,6 +315,7 @@ const FixedCostsPage: React.FC = () => {
             variant='contained'
             color='primary'
             disabled={createFixedCost.isPending}
+            data-testid='fixed-cost-dialog-submit'
           >
             {createFixedCost.isPending ? 'Creating...' : 'Create'}
           </Button>

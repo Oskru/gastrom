@@ -140,11 +140,19 @@ const HomePage: React.FC = () => {
               aria-label='dashboard mode'
               size='small'
             >
-              <ToggleButton value='view' aria-label='view mode'>
+              <ToggleButton
+                value='view'
+                aria-label='view mode'
+                data-testid='view-mode-button'
+              >
                 <VisibilityIcon sx={{ mr: 1 }} fontSize='small' />
                 View
               </ToggleButton>
-              <ToggleButton value='edit' aria-label='edit mode'>
+              <ToggleButton
+                value='edit'
+                aria-label='edit mode'
+                data-testid='customize-mode-button'
+              >
                 <EditIcon sx={{ mr: 1 }} fontSize='small' />
                 Customize
               </ToggleButton>
@@ -155,6 +163,7 @@ const HomePage: React.FC = () => {
               <Select
                 labelId='dashboard-timeframe-label'
                 id='dashboard-timeframe-select'
+                data-testid='timeframe-select'
                 value={timeframe}
                 label='Timeframe'
                 onChange={e => setTimeframe(e.target.value as StatisticsRange)}
@@ -175,6 +184,7 @@ const HomePage: React.FC = () => {
               startIcon={<RestartAltIcon />}
               onClick={handleResetDashboard}
               size='small'
+              data-testid='reset-dashboard-button'
             >
               Reset to Default
             </Button>
@@ -210,7 +220,11 @@ const HomePage: React.FC = () => {
               items={config.tiles.map(tile => tile.id)}
               strategy={rectSortingStrategy}
             >
-              <Grid container spacing={3}>
+              <Grid
+                container
+                spacing={3}
+                data-testid='dashboard-tiles-container'
+              >
                 {config.tiles.map(tile => (
                   <Grid item xs={12} sm={6} md={tile.width} key={tile.id}>
                     <SortableTile

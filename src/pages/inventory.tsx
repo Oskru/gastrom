@@ -300,8 +300,8 @@ const InventoryPage: React.FC = () => {
             value={activeTab}
             onChange={(_, newValue) => setActiveTab(newValue)}
           >
-            <Tab label='Ingredients' />
-            <Tab label='Products' />
+            <Tab label='Ingredients' data-testid='ingredients-tab' />
+            <Tab label='Products' data-testid='products-tab' />
           </Tabs>
         </Box>
 
@@ -328,6 +328,7 @@ const InventoryPage: React.FC = () => {
                       checked={showLowStockOnly}
                       onChange={handleLowStockFilterChange}
                       color='warning'
+                      data-testid='low-stock-toggle'
                     />
                   }
                   label={
@@ -341,6 +342,7 @@ const InventoryPage: React.FC = () => {
                   variant='contained'
                   color='primary'
                   onClick={handleOpenIngredientDialogForCreate}
+                  data-testid='add-ingredient-button'
                 >
                   Add Ingredient
                 </Button>
@@ -373,7 +375,7 @@ const InventoryPage: React.FC = () => {
                 <CircularProgress />
               </Box>
             ) : (
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} data-testid='ingredients-table'>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -392,6 +394,7 @@ const InventoryPage: React.FC = () => {
                     {displayItems.map(item => (
                       <TableRow
                         key={item.id}
+                        data-testid='ingredient-row'
                         sx={{
                           backgroundColor: isLowStock(item)
                             ? theme.palette.mode === 'dark'
@@ -443,6 +446,7 @@ const InventoryPage: React.FC = () => {
                             <IconButton
                               size='small'
                               onClick={() => handleOpenRestockDialog(item)}
+                              data-testid='restock-button'
                             >
                               <RestockIcon />
                             </IconButton>
@@ -452,6 +456,7 @@ const InventoryPage: React.FC = () => {
                               size='small'
                               color='error'
                               onClick={() => handleIngredientDelete(item.id)}
+                              data-testid='delete-ingredient-button'
                             >
                               <DeleteIcon />
                             </IconButton>
@@ -495,6 +500,7 @@ const InventoryPage: React.FC = () => {
                 variant='contained'
                 color='primary'
                 onClick={handleOpenProductDialogForCreate}
+                data-testid='add-product-button'
               >
                 Add Product
               </Button>
@@ -506,7 +512,7 @@ const InventoryPage: React.FC = () => {
                 <CircularProgress />
               </Box>
             ) : (
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} data-testid='products-table'>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -520,7 +526,7 @@ const InventoryPage: React.FC = () => {
                   </TableHead>
                   <TableBody>
                     {allProducts.map(product => (
-                      <TableRow key={product.id}>
+                      <TableRow key={product.id} data-testid='product-row'>
                         <TableCell>{product.id}</TableCell>
                         <TableCell>
                           <Typography>{product.name}</Typography>
@@ -556,6 +562,7 @@ const InventoryPage: React.FC = () => {
                               size='small'
                               color='error'
                               onClick={() => handleProductDelete(product.id)}
+                              data-testid='delete-product-button'
                             >
                               <DeleteIcon />
                             </IconButton>

@@ -135,6 +135,7 @@ const UsersPage: React.FC = () => {
           color='primary'
           onClick={handleOpenDialogForCreate}
           startIcon={<PersonAddIcon />}
+          data-testid='add-user-button'
         >
           Add User
         </Button>
@@ -145,7 +146,7 @@ const UsersPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} data-testid='users-table'>
           <Table>
             <TableHead>
               <TableRow>
@@ -159,7 +160,7 @@ const UsersPage: React.FC = () => {
             </TableHead>
             <TableBody>
               {users.map(user => (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} data-testid='user-row'>
                   <TableCell>{user.id}</TableCell>
                   <TableCell>{user.username}</TableCell>
                   <TableCell>
@@ -186,6 +187,7 @@ const UsersPage: React.FC = () => {
                         color='error'
                         onClick={() => handleDeleteUser(user.id, user.username)}
                         disabled={deleteUser.isPending}
+                        data-testid='delete-user-button'
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -211,6 +213,7 @@ const UsersPage: React.FC = () => {
         onClose={handleCloseDialog}
         fullWidth
         maxWidth='sm'
+        data-testid='user-dialog'
       >
         <DialogTitle>Add User</DialogTitle>
         <DialogContent>
@@ -223,6 +226,7 @@ const UsersPage: React.FC = () => {
               onChange={handleFormChange}
               margin='normal'
               helperText='Minimum 3 characters'
+              inputProps={{ 'data-testid': 'user-username-input' }}
             />
             <TextField
               fullWidth
@@ -231,6 +235,7 @@ const UsersPage: React.FC = () => {
               value={formState.firstName}
               onChange={handleFormChange}
               margin='normal'
+              inputProps={{ 'data-testid': 'user-firstname-input' }}
             />
             <TextField
               fullWidth
@@ -239,6 +244,7 @@ const UsersPage: React.FC = () => {
               value={formState.lastName}
               onChange={handleFormChange}
               margin='normal'
+              inputProps={{ 'data-testid': 'user-lastname-input' }}
             />
             <TextField
               fullWidth
@@ -249,6 +255,7 @@ const UsersPage: React.FC = () => {
               onChange={handleFormChange}
               margin='normal'
               helperText='Minimum 6 characters'
+              inputProps={{ 'data-testid': 'user-password-input' }}
             />
             <FormControl fullWidth margin='normal'>
               <InputLabel>Role</InputLabel>
@@ -256,6 +263,7 @@ const UsersPage: React.FC = () => {
                 value={formState.role}
                 label='Role'
                 onChange={e => handleRoleChange(e.target.value as UserRole)}
+                data-testid='user-role-select'
               >
                 <MenuItem value='MANAGER'>Manager</MenuItem>
                 <MenuItem value='ADMIN'>Admin</MenuItem>
@@ -264,8 +272,15 @@ const UsersPage: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSubmit} variant='contained' color='primary'>
+          <Button onClick={handleCloseDialog} data-testid='user-dialog-cancel'>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant='contained'
+            color='primary'
+            data-testid='user-dialog-submit'
+          >
             Create
           </Button>
         </DialogActions>

@@ -19,38 +19,53 @@ import {
 import { useUser } from '../../hooks/use-user';
 
 const mainListItems = [
-  { text: 'Home', icon: <HomeRoundedIcon />, url: '/' },
+  { text: 'Home', icon: <HomeRoundedIcon />, url: '/', testId: 'nav-home' },
   {
     text: 'Inventory',
     icon: <Inventory />,
     url: '/inventory',
+    testId: 'nav-inventory',
   },
   {
     text: 'Employees',
     icon: <PeopleRounded />,
     url: '/employees',
+    testId: 'nav-employees',
   },
   {
     text: 'Fixed Costs',
     icon: <AttachMoney />,
     url: '/fixed-costs',
+    testId: 'nav-fixed-costs',
   },
   {
     text: 'Sales Reports',
     icon: <Assessment />,
     url: '/sales-reports',
+    testId: 'nav-sales-reports',
   },
   {
     text: 'Users',
     icon: <ManageAccounts />,
     url: '/users',
     requiresAdmin: true,
+    testId: 'nav-users',
   },
 ];
 
 const secondaryListItems = [
-  { text: 'About', icon: <InfoRoundedIcon />, url: '/about' },
-  { text: 'Feedback', icon: <HelpRoundedIcon />, url: '/feedback' },
+  {
+    text: 'About',
+    icon: <InfoRoundedIcon />,
+    url: '/about',
+    testId: 'nav-about',
+  },
+  {
+    text: 'Feedback',
+    icon: <HelpRoundedIcon />,
+    url: '/feedback',
+    testId: 'nav-feedback',
+  },
 ];
 
 interface MenuContentProps {
@@ -70,10 +85,13 @@ export default function MenuContent({ isCollapsed = false }: MenuContentProps) {
     return true;
   });
 
-  const renderListItem = (item: (typeof mainListItems)[0]) => {
+  const renderListItem = (
+    item: (typeof mainListItems)[0] & { testId?: string }
+  ) => {
     const isSelected = location.pathname === item.url;
     const listItemButton = (
       <ListItemButton
+        data-testid={item.testId}
         selected={isSelected}
         onClick={() => navigate(item.url)}
         sx={{

@@ -75,7 +75,7 @@ export default function SideMenu() {
   }, [isMobile]);
 
   return (
-    <SideDrawer variant='permanent' open={isOpen}>
+    <SideDrawer variant='permanent' open={isOpen} data-testid='side-menu'>
       <Box
         sx={{
           display: 'flex',
@@ -84,7 +84,10 @@ export default function SideMenu() {
           p: 1,
         }}
       >
-        <IconButton onClick={() => setIsOpen(!isOpen)}>
+        <IconButton
+          onClick={() => setIsOpen(!isOpen)}
+          data-testid='toggle-menu-button'
+        >
           {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </Box>
@@ -111,6 +114,7 @@ export default function SideMenu() {
         <Avatar
           alt={user?.firstName + ' ' + user?.lastName}
           src={userAvatarUrl}
+          data-testid='user-avatar'
           sx={{
             width: isOpen ? 44 : 36,
             height: isOpen ? 44 : 36,

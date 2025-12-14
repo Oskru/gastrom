@@ -201,6 +201,7 @@ const EmployeesPage: React.FC = () => {
           variant='contained'
           color='primary'
           onClick={handleOpenDialogForCreate}
+          data-testid='add-employee-button'
         >
           Add Employee
         </Button>
@@ -214,6 +215,7 @@ const EmployeesPage: React.FC = () => {
             color='secondary'
             startIcon={<ClearIcon />}
             onClick={handleClearFilter}
+            data-testid='clear-filter-button'
           >
             Clear Filter
           </Button>
@@ -231,7 +233,7 @@ const EmployeesPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} data-testid='employees-table'>
           <Table>
             <TableHead>
               <TableRow>
@@ -246,7 +248,7 @@ const EmployeesPage: React.FC = () => {
             </TableHead>
             <TableBody>
               {displayedEmployees.map(emp => (
-                <TableRow key={emp.id}>
+                <TableRow key={emp.id} data-testid='employee-row'>
                   <TableCell>{emp.id}</TableCell>
                   <TableCell>
                     {emp.firstName} {emp.lastName}
@@ -260,6 +262,7 @@ const EmployeesPage: React.FC = () => {
                       <IconButton
                         size='small'
                         onClick={() => handleOpenHoursDialog(emp)}
+                        data-testid='update-hours-button'
                       >
                         <TimeIcon />
                       </IconButton>
@@ -268,6 +271,7 @@ const EmployeesPage: React.FC = () => {
                       <IconButton
                         size='small'
                         onClick={() => handleGenerateSalary(emp.id)}
+                        data-testid='generate-salary-button'
                       >
                         <MoneyIcon />
                       </IconButton>
@@ -277,6 +281,7 @@ const EmployeesPage: React.FC = () => {
                         size='small'
                         color='error'
                         onClick={() => handleDelete(emp.id)}
+                        data-testid='delete-employee-button'
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -304,6 +309,7 @@ const EmployeesPage: React.FC = () => {
         onClose={handleCloseDialog}
         fullWidth
         maxWidth='sm'
+        data-testid='employee-dialog'
       >
         <DialogTitle>Add Employee</DialogTitle>
         <DialogContent>
@@ -315,6 +321,7 @@ const EmployeesPage: React.FC = () => {
               value={formState.firstName}
               onChange={handleFormChange}
               margin='normal'
+              inputProps={{ 'data-testid': 'employee-firstname-input' }}
             />
             <TextField
               fullWidth
@@ -323,6 +330,7 @@ const EmployeesPage: React.FC = () => {
               value={formState.lastName}
               onChange={handleFormChange}
               margin='normal'
+              inputProps={{ 'data-testid': 'employee-lastname-input' }}
             />
             <TextField
               fullWidth
@@ -332,6 +340,7 @@ const EmployeesPage: React.FC = () => {
               value={formState.email}
               onChange={handleFormChange}
               margin='normal'
+              inputProps={{ 'data-testid': 'employee-email-input' }}
             />
             <TextField
               fullWidth
@@ -340,6 +349,7 @@ const EmployeesPage: React.FC = () => {
               value={formState.phoneNumber}
               onChange={handleFormChange}
               margin='normal'
+              inputProps={{ 'data-testid': 'employee-phone-input' }}
             />
             <TextField
               fullWidth
@@ -349,12 +359,23 @@ const EmployeesPage: React.FC = () => {
               value={formState.salaryPerHour}
               onChange={handleFormChange}
               margin='normal'
+              inputProps={{ 'data-testid': 'employee-salary-input' }}
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSubmit} variant='contained' color='primary'>
+          <Button
+            onClick={handleCloseDialog}
+            data-testid='employee-dialog-cancel'
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant='contained'
+            color='primary'
+            data-testid='employee-dialog-submit'
+          >
             Create
           </Button>
         </DialogActions>
@@ -366,6 +387,7 @@ const EmployeesPage: React.FC = () => {
         onClose={handleCloseHoursDialog}
         fullWidth
         maxWidth='xs'
+        data-testid='hours-dialog'
       >
         <DialogTitle>Update Hours Worked</DialogTitle>
         <DialogContent>
@@ -385,16 +407,23 @@ const EmployeesPage: React.FC = () => {
                 value={hoursToUpdate}
                 onChange={e => setHoursToUpdate(Number(e.target.value))}
                 margin='normal'
+                inputProps={{ 'data-testid': 'hours-input' }}
               />
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseHoursDialog}>Cancel</Button>
+          <Button
+            onClick={handleCloseHoursDialog}
+            data-testid='hours-dialog-cancel'
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleUpdateHours}
             variant='contained'
             color='primary'
+            data-testid='hours-dialog-submit'
           >
             Update
           </Button>

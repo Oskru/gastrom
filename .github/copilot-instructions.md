@@ -70,11 +70,21 @@ npm run preview      # Preview production build
 
 ### Testing
 
-- **E2E Tests:** Playwright tests in `tests/` directory
-- **Auth Testing:** Tests use Basic Auth credentials injection - see
-  `tests/e2e.test.spec.ts`
+- **E2E Tests:** Playwright tests in `tests/` directory with Page Object Model
+- **Test Structure:**
+  - `tests/fixtures.ts` - Playwright fixtures for auto-instantiating page
+    objects
+  - `tests/auth.setup.ts` - Global auth setup using `TEST_TOKEN` env variable
+  - `tests/pages/*.po.ts` - Page Object classes with selectors and actions
+  - `tests/*.spec.ts` - Test specifications organized by feature
+- **Test Projects:**
+  - `setup` - Authentication setup (runs first)
+  - `unauthenticated` - Tests without auth (`auth.spec.ts`,
+    `error-handling.spec.ts`)
+  - `chromium` - Main authenticated test suite
 - **Run Tests:** `npm run test:e2e` (headless) or `npm run test:e2e-ui`
   (interactive)
+- **Environment:** Set `TEST_TOKEN` in `.env` file for authentication
 
 ### Key Integration Points
 
@@ -103,5 +113,8 @@ npm run preview      # Preview production build
 - Main routing happens in `src/routing/routes.tsx`
 - MUI v6 uses CSS variables - check theme customizations in
   `src/styles/customizations/`
-- Playwright tests require the dev server running on port 5173
+- Playwright tests use global auth setup - set `TEST_TOKEN` env variable
+- Test dev server starts automatically via `webServer` config in
+  `playwright.config.ts`
+- Page Objects use `data-testid` attributes for stable selectors
 - Font imports include `@ts-expect-error` comment for Inter font resolution

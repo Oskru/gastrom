@@ -135,6 +135,7 @@ export default function SignIn() {
           <Typography
             component='h1'
             variant='h4'
+            data-testid='sign-in-title'
             sx={{
               width: '100%',
               fontSize: 'clamp(2rem, 10vw, 2.5rem)',
@@ -151,6 +152,7 @@ export default function SignIn() {
           <Typography
             variant='body2'
             color='text.secondary'
+            data-testid='sign-in-subtitle'
             sx={{ mb: 2, fontWeight: 500 }}
           >
             Sign in to continue to your dashboard
@@ -169,6 +171,7 @@ export default function SignIn() {
             <Collapse in={loginError}>
               <Alert
                 severity='error'
+                data-testid='login-error-alert'
                 onClose={() => setLoginError(false)}
                 sx={{
                   mb: 1,
@@ -195,6 +198,7 @@ export default function SignIn() {
                 fullWidth
                 variant='outlined'
                 color={emailError ? 'error' : 'primary'}
+                inputProps={{ 'data-testid': 'email-input' }}
               />
             </FormControl>
             <FormControl>
@@ -214,12 +218,14 @@ export default function SignIn() {
                 fullWidth
                 variant='outlined'
                 color={passwordError ? 'error' : 'primary'}
+                inputProps={{ 'data-testid': 'password-input' }}
               />
             </FormControl>
             <Button
               type='submit'
               fullWidth
               variant='contained'
+              data-testid='sign-in-button'
               onClick={validateInputs}
             >
               {isLoggingIn ? <CircularProgress size={25} /> : 'Sign in'}

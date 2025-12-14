@@ -132,8 +132,12 @@ gastrom/
 │   │   └── api-instance.ts
 │   ├── consts/           # Constants and configuration
 │   └── main.tsx          # Application entry point
-├── tests/                # E2E tests
-│   └── e2e.test.spec.ts
+├── tests/                # E2E tests (Playwright)
+│   ├── fixtures.ts       # Playwright fixtures
+│   ├── auth.setup.ts     # Global auth setup
+│   ├── pages/            # Page Object classes (*.po.ts)
+│   ├── *.spec.ts         # Test specifications
+│   └── .auth/            # Stored auth state (gitignored)
 ├── vite.config.ts        # Vite configuration
 ├── tsconfig.json         # TypeScript configuration
 └── playwright.config.ts  # Playwright test configuration
@@ -177,26 +181,75 @@ which:
 
 ### End-to-End Tests
 
-Run Playwright tests in headless mode:
+Gastrom uses **Playwright** for comprehensive E2E testing with a Page Object
+Model architecture.
+
+#### Running Tests
 
 ```bash
+# Run all tests (headless)
 npm run test:e2e
-```
 
-Run tests with interactive UI:
-
-```bash
+# Run tests with interactive UI
 npm run test:e2e-ui
 ```
 
-### Test Coverage
+#### Test Environment Setup
 
-The test suite includes:
+1. Create a `.env` file (or `.env.test`) with your test token:
 
-- Authentication flow testing
-- Navigation between pages
-- Dashboard element rendering
-- Data fetching and display
+   ```env
+   TEST_TOKEN=your_jwt_token_here
+   ```
+
+2. The dev server starts automatically via Playwright's `webServer` config.
+
+#### Test Architecture
+
+```
+tests/
+├── fixtures.ts           # Playwright fixtures for page object injection
+├── auth.setup.ts         # Global authentication setup
+├── pages/                # Page Object classes
+│   ├── base.po.ts        # Base page with common navigation
+│   ├── home.po.ts        # Home/Dashboard page
+│   ├── inventory.po.ts   # Inventory page
+│   ├── employee.po.ts    # Employee management page
+│   ├── my-account.po.ts  # User account page
+│   ├── sign-in.po.ts     # Sign-in page
+│   └── ...               # Other page objects
+├── auth.spec.ts          # Authentication tests
+├── dashboard.spec.ts     # Dashboard functionality tests
+├── navigation.spec.ts    # Navigation tests
+├── inventory.spec.ts     # Inventory page tests
+├── employees.spec.ts     # Employee management tests
+├── responsive.spec.ts    # Responsive design tests
+├── side-menu.spec.ts     # Side menu navigation tests
+├── error-handling.spec.ts # Auth redirects and error handling
+└── ...                   # Other test specs
+```
+
+#### Test Projects (playwright.config.ts)
+
+- **setup** - Runs authentication setup before tests
+- **unauthenticated** - Tests that run without auth (sign-in, redirects)
+- **chromium** - Main test suite with authenticated user
+
+### Page Object Pattern
+
+Tests use the Page Object Model with Playwright fixtures for clean, maintainable
+code:
+
+```typescript
+// Using fixtures - page objects are auto-instantiated
+import { test, expect } from './fixtures';
+
+test('should display inventory', async ({ inventoryPage }) => {
+  await inventoryPage.goto();
+  await inventoryPage.expectToBeOnInventoryPage();
+  await expect(inventoryPage.ingredientsTab).toBeVisible();
+});
+```
 
 ## 🎨 Theming
 

@@ -25,3 +25,9 @@ dist-ssr
 
 # test results
 test-results
+
+# Playwright auth storage
+tests/.auth/
+
+# Enironment variables
+.env

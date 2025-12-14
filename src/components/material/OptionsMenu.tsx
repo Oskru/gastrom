@@ -65,6 +65,7 @@ export default function OptionsMenu({
     <>
       {buttonVariant === 'icon' ? (
         <MenuButton
+          data-testid='options-menu-button'
           onClick={handleClick}
           size={compact ? 'small' : 'medium'}
           sx={{
@@ -118,6 +119,7 @@ export default function OptionsMenu({
         {options.map((option, index) => (
           <MenuItem
             key={index}
+            data-testid={`menu-option-${option.label.toLowerCase().replace(/\s+/g, '-')}`}
             onClick={() => handleOptionClick(option.onClick)}
             sx={{ py: 1.5 }}
           >
